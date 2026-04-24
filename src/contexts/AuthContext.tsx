@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import Cookies from 'js-cookie';
 import { authService } from '../services/api';
 
 export function parseJwt(token: string) {
@@ -41,7 +42,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const initAuth = () => {
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token');
       if (token) {
         const decoded = parseJwt(token);
         if (decoded) {
@@ -57,14 +58,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const login = (accessToken: string, refreshToken: string) => {
-    localStorage.setItem('token', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
+    Cookies.set('token', accessToken, { expires: 7, sameSite: 'strict' });
+    Cookies.set('refreshToken', refreshToken, { expires: 30, sameSite: 'strict' });
     
     const decoded = parseJwt(accessToken);
     if (decoded) {
       const role = decoded.role?.toLowerCase();
       setUser({ id: decoded.sub, email: decoded.email, role });
-      localStorage.setItem('role', role);
+      Cookies.set('role', role, { expires: 7, sameSite: 'strict' });
     }
   };
 
@@ -74,9 +75,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (e) {
       console.error('Logout failed:', e);
     } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('role');
+      Cookies.remove('token');
+      Cookies.remove('refreshToken');
+      Cookies.remove('role');
       setUser(null);
     }
   };

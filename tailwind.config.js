@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -8,20 +9,33 @@ export default {
     extend: {
       colors: {
         primary: {
-          50: '#f5f3ff',
-          100: '#ede9fe',
-          200: '#ddd6fe',
-          300: '#c4b5fd',
-          400: '#a78bfa',
-          500: '#8b5cf6',
-          600: '#7c3aed',
-          700: '#6d28d9',
-          800: '#5b21b6',
-          900: '#4c1d95',
-          950: '#2e1065',
+          50: '#eef6fc',
+          100: '#dcecf9',
+          200: '#bce0f4',
+          300: '#8acdec',
+          400: '#4faede',
+          500: '#035fab',
+          600: '#034a8a',
+          700: '#033a6b',
+          800: '#042f56',
+          900: '#052a54',
+          950: '#031a38',
         },
-        background: '#0f172a',
-        surface: '#1e293b',
+        accent: {
+          50: '#fef8ee',
+          100: '#fcefd8',
+          200: '#fadab2',
+          300: '#f6be83',
+          400: '#f19e53',
+          500: '#ec8104',
+          600: '#dc6d03',
+          700: '#b75304',
+          800: '#92410b',
+          900: '#75360c',
+          950: '#3f1a04',
+        },
+        background: 'var(--bg-color)',
+        surface: 'var(--surface-color)',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-out forwards',

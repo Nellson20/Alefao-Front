@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { User, Mail, Phone, MapPin, Shield, Save, Loader2, Globe, Bell } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Shield, Save, Loader2, Globe, Bell, Moon, Sun } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { userService } from '../services/api';
 import GlassCard from '../components/ui/GlassCard';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 
 const ProfilePage: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
   const [formData, setFormData] = useState({
     fullName: '',
     phoneNumber: '',
@@ -23,6 +26,23 @@ const ProfilePage: React.FC = () => {
     },
   });
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const toggleTheme = () => {
+    if (isDarkMode) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+      setIsDarkMode(false);
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+      setIsDarkMode(true);
+    }
+  };
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'fr' : 'en';
+    i18n.changeLanguage(newLang);
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -89,10 +109,10 @@ const ProfilePage: React.FC = () => {
       }
 
       await userService.updateProfile(updateData);
-      setMessage({ type: 'success', text: 'Profile updated successfully!' });
+      setMessage({ type: 'success', text: t('profile.updated_success') || 'Profile updated successfully!' });
     } catch (error) {
       console.error('Failed to update profile:', error);
-      setMessage({ type: 'error', text: 'Failed to update profile. Please try again.' });
+      setMessage({ type: 'error', text: t('profile.updated_error') || 'Failed to update profile. Please try again.' });
     } finally {
       setIsSaving(false);
     }
@@ -109,8 +129,8 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Profile Settings</h1>
-        <p className="text-slate-500">Manage your personal information and preferences</p>
+        <h1 className="text-3xl font-bold">{t('profile.title')}</h1>
+        <p className="text-slate-500">{t('profile.subtitle')}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
@@ -127,21 +147,30 @@ const ProfilePage: React.FC = () => {
             </GlassCard>
 
             <GlassCard className="space-y-4">
-              <h4 className="font-bold text-sm uppercase tracking-widest text-slate-500">Preferences</h4>
-              <button type="button" className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors">
+              <h4 className="font-bold text-sm uppercase tracking-widest text-slate-500">{t('profile.preferences')}</h4>
+              <button type="button" onClick={toggleLanguage} className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors">
                 <div className="flex items-center gap-3">
                   <Globe size={18} className="text-blue-400" />
-                  <span className="text-sm font-medium">Language</span>
+                  <span className="text-sm font-medium">{t('profile.language')}</span>
                 </div>
-                <span className="text-xs font-bold text-primary-400 uppercase">English</span>
+                <span className="text-xs font-bold text-primary-400 uppercase">{i18n.language === 'en' ? t('profile.english') : t('profile.french')}</span>
               </button>
               <button type="button" className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors">
                 <div className="flex items-center gap-3">
                   <Bell size={18} className="text-amber-400" />
-                  <span className="text-sm font-medium">Notifications</span>
+                  <span className="text-sm font-medium">{t('profile.notifications')}</span>
                 </div>
                 <div className="w-8 h-4 bg-primary-500 rounded-full relative">
                    <div className="absolute right-1 top-1 w-2 h-2 bg-white rounded-full" />
+                </div>
+              </button>
+              <button type="button" onClick={toggleTheme} className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors">
+                <div className="flex items-center gap-3">
+                  {isDarkMode ? <Moon size={18} className="text-indigo-400" /> : <Sun size={18} className="text-amber-400" />}
+                  <span className="text-sm font-medium">{t('profile.theme')}</span>
+                </div>
+                <div className={`w-10 h-5 rounded-full relative transition-colors ${isDarkMode ? 'bg-primary-500' : 'bg-slate-400'}`}>
+                   <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${isDarkMode ? 'right-0.5' : 'left-0.5'}`} />
                 </div>
               </button>
             </GlassCard>
@@ -152,12 +181,12 @@ const ProfilePage: React.FC = () => {
             <GlassCard>
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                 <Shield size={20} className="text-primary-400" />
-                General Information
+                {t('profile.general_info')}
               </h3>
               
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-400 ml-1">Full Name</label>
+                  <label className="text-sm font-bold text-slate-400 ml-1">{t('profile.full_name')}</label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                     <input 
@@ -165,14 +194,14 @@ const ProfilePage: React.FC = () => {
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleChange}
-                      placeholder="Your full name"
+                      placeholder={t('profile.full_name')}
                       className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 outline-none focus:border-primary-500/50 transition-all"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-400 ml-1">Email Address</label>
+                  <label className="text-sm font-bold text-slate-400 ml-1">{t('profile.email')}</label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                     <input 
@@ -186,7 +215,7 @@ const ProfilePage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-400 ml-1">Phone Number</label>
+                  <label className="text-sm font-bold text-slate-400 ml-1">{t('profile.phone')}</label>
                   <div className="relative">
                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                     <input 
@@ -194,7 +223,7 @@ const ProfilePage: React.FC = () => {
                       name="phoneNumber"
                       value={formData.phoneNumber}
                       onChange={handleChange}
-                      placeholder="Your phone number"
+                      placeholder={t('profile.phone')}
                       className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 outline-none focus:border-primary-500/50 transition-all"
                     />
                   </div>
@@ -207,11 +236,11 @@ const ProfilePage: React.FC = () => {
               <GlassCard>
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                   <Globe size={20} className="text-emerald-400" />
-                  Store Details
+                  {t('profile.store_details')}
                 </h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-400 ml-1">Shop Name</label>
+                    <label className="text-sm font-bold text-slate-400 ml-1">{t('profile.shop_name')}</label>
                     <input 
                       type="text" 
                       name="vendor.shopName"
@@ -221,7 +250,7 @@ const ProfilePage: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-400 ml-1">Shop Address</label>
+                    <label className="text-sm font-bold text-slate-400 ml-1">{t('profile.shop_address')}</label>
                     <div className="relative">
                       <MapPin className="absolute left-4 top-3 text-slate-500" size={18} />
                       <textarea 
@@ -240,11 +269,11 @@ const ProfilePage: React.FC = () => {
               <GlassCard>
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                   <Globe size={20} className="text-blue-400" />
-                  Vehicle Information
+                  {t('profile.vehicle_info')}
                 </h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-400 ml-1">Vehicle Type</label>
+                    <label className="text-sm font-bold text-slate-400 ml-1">{t('profile.vehicle_type')}</label>
                     <input 
                       type="text" 
                       name="driver.vehicleType"
@@ -272,7 +301,7 @@ const ProfilePage: React.FC = () => {
                 icon={isSaving ? Loader2 : Save} 
                 className={isSaving ? 'opacity-50 cursor-not-allowed' : ''}
               >
-                {isSaving ? 'Saving Changes...' : 'Save Changes'}
+                {isSaving ? t('profile.saving') : t('profile.save_changes')}
               </Button>
             </div>
           </div>

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Package, Plus, Search, Edit2, Trash2, Loader2, X, Save, AlertCircle, AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { productService } from '../services/api';
 import GlassCard from '../components/ui/GlassCard';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 
 const InventoryPage: React.FC = () => {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -112,10 +114,10 @@ const InventoryPage: React.FC = () => {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Inventory & Menu</h1>
-          <p className="text-slate-500">Manage your items, prices and availability</p>
+          <h1 className="text-3xl font-bold">{t('inventory.title')}</h1>
+          <p className="text-slate-500">{t('inventory.subtitle')}</p>
         </div>
-        <Button icon={Plus} onClick={() => handleOpenModal()}>Add New Item</Button>
+        <Button icon={Plus} onClick={() => handleOpenModal()}>{t('inventory.add_item')}</Button>
       </div>
 
       {isLoading ? (
@@ -135,10 +137,11 @@ const InventoryPage: React.FC = () => {
                   <div className="flex items-center gap-3 mb-1">
                     <h3 className="font-bold text-lg truncate">{product.name}</h3>
                     <Badge variant={product.status === 'IN_STOCK' ? 'success' : product.status === 'LOW_STOCK' ? 'warning' : 'danger'}>
-                      {product.status.replace('_', ' ')}
+                      {t(`inventory.status.${product.status.toLowerCase()}`, { defaultValue: product.status.replace('_', ' ') })}
                     </Badge>
                   </div>
-                  <p className="text-sm text-slate-500">{product.category || 'No Category'} • {product.description || 'No description'}</p>
+                  <p className="text-sm text-slate-500 mb-1">{product.category || t('common.no_category')} • {product.description || t('common.no_description')}</p>
+                  <p className="text-lg font-black text-primary-400 sm:hidden">${parseFloat(product.price).toFixed(2)}</p>
                 </div>
 
                 <div className="text-right hidden sm:block">
@@ -165,8 +168,8 @@ const InventoryPage: React.FC = () => {
           {products.length === 0 && (
             <div className="text-center py-20 bg-white/5 rounded-[32px] border border-dashed border-white/10">
               <Package size={48} className="mx-auto text-slate-600 mb-4" />
-              <p className="text-slate-500 font-medium">Your inventory is empty.</p>
-              <button onClick={() => handleOpenModal()} className="text-primary-400 font-bold hover:underline mt-2">Add your first item</button>
+              <p className="text-slate-500 font-medium">{t('inventory.empty')}</p>
+              <button onClick={() => handleOpenModal()} className="text-primary-400 font-bold hover:underline mt-2">{t('inventory.add_first')}</button>
             </div>
           )}
         </div>
@@ -178,7 +181,7 @@ const InventoryPage: React.FC = () => {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
           <GlassCard className="relative w-full max-w-lg z-10 animate-fade-in-up">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
+              <h2 className="text-2xl font-bold">{editingProduct ? t('inventory.edit_item') : t('inventory.add_item_title')}</h2>
               <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
                 <X size={24} className="text-slate-400" />
               </button>
@@ -187,7 +190,7 @@ const InventoryPage: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-400 ml-1">Product Name</label>
+                  <label className="text-sm font-bold text-slate-400 ml-1">{t('inventory.item_name')}</label>
                   <input 
                     type="text" 
                     required
@@ -199,7 +202,7 @@ const InventoryPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-400 ml-1">Price ($)</label>
+                  <label className="text-sm font-bold text-slate-400 ml-1">{t('inventory.item_price')}</label>
                   <input 
                     type="number" 
                     step="0.01"
@@ -212,7 +215,7 @@ const InventoryPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-400 ml-1">Icon/Emoji</label>
+                  <label className="text-sm font-bold text-slate-400 ml-1">{t('inventory.item_icon')}</label>
                   <input 
                     type="text" 
                     value={formData.image}
@@ -222,7 +225,7 @@ const InventoryPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-400 ml-1">Category</label>
+                  <label className="text-sm font-bold text-slate-400 ml-1">{t('inventory.item_category')}</label>
                   <input 
                     type="text" 
                     value={formData.category}
@@ -233,21 +236,21 @@ const InventoryPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-400 ml-1">Status</label>
+                  <label className="text-sm font-bold text-slate-400 ml-1">{t('inventory.item_status')}</label>
                   <select 
                     value={formData.status}
                     onChange={(e) => setFormData({...formData, status: e.target.value})}
                     className="w-full bg-[#1e293b] border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-primary-500/50 transition-all appearance-none"
                   >
-                    <option value="IN_STOCK">In Stock</option>
-                    <option value="LOW_STOCK">Low Stock</option>
-                    <option value="OUT_OF_STOCK">Out of Stock</option>
+                    <option value="IN_STOCK">{t('inventory.status.in_stock')}</option>
+                    <option value="LOW_STOCK">{t('inventory.status.low_stock')}</option>
+                    <option value="OUT_OF_STOCK">{t('inventory.status.out_of_stock')}</option>
                   </select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-400 ml-1">Description</label>
+                <label className="text-sm font-bold text-slate-400 ml-1">{t('inventory.item_description')}</label>
                 <textarea 
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
@@ -262,7 +265,7 @@ const InventoryPage: React.FC = () => {
                   className="flex-1"
                   onClick={() => setIsModalOpen(false)}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button 
                   type="submit" 
@@ -270,7 +273,7 @@ const InventoryPage: React.FC = () => {
                   icon={isSubmitting ? Loader2 : Save}
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Saving...' : (editingProduct ? 'Update Product' : 'Create Product')}
+                  {isSubmitting ? t('common.saving') : (editingProduct ? t('common.save') : t('common.confirm'))}
                 </Button>
               </div>
             </form>
@@ -289,10 +292,9 @@ const InventoryPage: React.FC = () => {
                 <AlertTriangle size={40} className="text-rose-500" />
               </div>
               
-              <h2 className="text-2xl font-black mb-2">Are you sure?</h2>
+              <h2 className="text-2xl font-black mb-2">{t('inventory.delete_title')}</h2>
               <p className="text-slate-400 mb-8 leading-relaxed">
-                You are about to delete <span className="text-white font-bold">"{productToDelete?.name}"</span>. 
-                This action is permanent and cannot be undone.
+                {t('inventory.delete_warning', { name: productToDelete?.name })}
               </p>
 
               <div className="flex gap-4 w-full">
@@ -302,7 +304,7 @@ const InventoryPage: React.FC = () => {
                   onClick={() => setIsDeleteModalOpen(false)}
                   disabled={isSubmitting}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button 
                   className="flex-1 !bg-rose-500 hover:!bg-rose-600 !text-white shadow-lg shadow-rose-500/20"
@@ -310,7 +312,7 @@ const InventoryPage: React.FC = () => {
                   icon={isSubmitting ? Loader2 : Trash2}
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Deleting...' : 'Delete Item'}
+                  {isSubmitting ? t('common.deleting') : t('common.delete')}
                 </Button>
               </div>
             </div>

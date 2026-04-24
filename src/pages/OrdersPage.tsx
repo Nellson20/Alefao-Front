@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Package, Search, Filter, Calendar, MapPin, User, Clock, Loader2, ChevronRight, Plus, Edit2, Trash2, X, Save, AlertTriangle, FileText, Image as ImageIcon, Paperclip, Upload } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { orderService } from '../services/api';
 import GlassCard from '../components/ui/GlassCard';
@@ -7,6 +8,7 @@ import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 
 const OrdersPage: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -410,22 +412,22 @@ const OrdersPage: React.FC = () => {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Orders Management</h1>
-          <p className="text-slate-500">Track and manage all deliveries in the system</p>
+          <h1 className="text-3xl font-bold">{t('orders.title')}</h1>
+          <p className="text-slate-500">{t('orders.subtitle')}</p>
         </div>
         <div className="flex gap-3">
           <div className="relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-500 transition-colors" size={18} />
             <input 
               type="text" 
-              placeholder="Search by ID or Status..." 
+              placeholder={t('common.search')} 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 outline-none focus:border-primary-500/50 transition-all w-full md:w-64"
             />
           </div>
           {user?.role === 'vendor' && (
-            <Button icon={Plus} onClick={() => handleOpenModal()}>New Order</Button>
+            <Button icon={Plus} onClick={() => handleOpenModal()}>{t('orders.create_new')}</Button>
           )}
         </div>
       </div>
@@ -443,13 +445,13 @@ const OrdersPage: React.FC = () => {
                     </div>
                     <span className="font-bold text-lg">#{order.id.substring(0, 8)}</span>
                   </div>
-                  <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
+                  <Badge variant={getStatusVariant(order.status)}>{t(`orders.status.${order.status.toLowerCase()}`, { defaultValue: order.status })}</Badge>
                 </div>
 
                 {/* Details Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 flex-1">
                   <div className="space-y-1">
-                    <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Delivery Address</p>
+                    <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">{t('orders.delivery')}</p>
                     <div className="flex items-center gap-2 text-slate-300">
                       <MapPin size={14} className="text-primary-400" />
                       <span className="text-sm font-medium truncate max-w-[150px]">{order.deliveryAddress}</span>
@@ -457,15 +459,15 @@ const OrdersPage: React.FC = () => {
                   </div>
 
                   <div className="space-y-1">
-                    <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Vendor</p>
+                    <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">{t('orders.vendor')}</p>
                     <div className="flex items-center gap-2 text-slate-300">
                       <User size={14} className="text-emerald-400" />
-                      <span className="text-sm font-medium">{order.vendor?.shopName || 'Partner Store'}</span>
+                      <span className="text-sm font-medium">{order.vendor?.shopName || t('common.no_data')}</span>
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Created At</p>
+                    <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">{t('common.date')}</p>
                     <div className="flex items-center gap-2 text-slate-300">
                       <Clock size={14} className="text-violet-400" />
                       <span className="text-sm font-medium">{new Date(order.createdAt).toLocaleDateString()}</span>
@@ -473,7 +475,7 @@ const OrdersPage: React.FC = () => {
                   </div>
 
                   <div className="space-y-1">
-                    <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Total Price</p>
+                    <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">{t('orders.amount')}</p>
                     <p className="text-lg font-black text-slate-100">${parseFloat(order.price).toFixed(2)}</p>
                   </div>
                 </div>
@@ -521,7 +523,7 @@ const OrdersPage: React.FC = () => {
                     className="group-hover:bg-primary-500 group-hover:text-white transition-all"
                     onClick={() => setViewingOrder(order)}
                   >
-                    Details
+                    {t('orders.details')}
                   </Button>
                 </div>
               </div>
@@ -532,9 +534,9 @@ const OrdersPage: React.FC = () => {
             <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
               <Package size={40} className="text-slate-600" />
             </div>
-            <h3 className="text-xl font-bold mb-2">No Orders Found</h3>
+            <h3 className="text-xl font-bold mb-2">{t('orders.empty_title')}</h3>
             <p className="text-slate-500 max-w-sm mx-auto">
-              We couldn't find any orders matching your current filters or search terms.
+              {t('orders.empty_subtitle')}
             </p>
           </GlassCard>
         )}
@@ -546,7 +548,7 @@ const OrdersPage: React.FC = () => {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
           <GlassCard className="relative w-full max-w-4xl z-10 animate-fade-in-up">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">{editingOrder ? 'Edit Order' : 'Create New Order'}</h2>
+              <h2 className="text-2xl font-bold">{editingOrder ? t('orders.edit_order') : t('orders.create_order')}</h2>
               <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
                 <X size={24} className="text-slate-400" />
               </button>
@@ -556,11 +558,11 @@ const OrdersPage: React.FC = () => {
               {/* Section: Customer Information */}
               <div className="space-y-4">
                 <h3 className="text-sm font-black text-primary-400 uppercase tracking-widest flex items-center gap-2">
-                  <User size={16} /> Customer Information
+                  <User size={16} /> {t('orders.customer_info')}
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">Client Name</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">{t('orders.client_name')}</label>
                     <input 
                       type="text" required value={formData.clientName}
                       onChange={(e) => setFormData({...formData, clientName: e.target.value})}
@@ -569,7 +571,7 @@ const OrdersPage: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">Client Phone 📞</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">{t('orders.client_phone')} 📞</label>
                     <input 
                       type="text" required value={formData.clientPhone}
                       onChange={(e) => setFormData({...formData, clientPhone: e.target.value})}
@@ -578,7 +580,7 @@ const OrdersPage: React.FC = () => {
                     />
                   </div>
                   <div className="col-span-2 space-y-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">Client Note (Optional)</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">{t('orders.client_note')} (Optional)</label>
                     <textarea 
                       value={formData.clientNote}
                       onChange={(e) => setFormData({...formData, clientNote: e.target.value})}
@@ -592,11 +594,11 @@ const OrdersPage: React.FC = () => {
               {/* Section: Locations & Geolocation */}
               <div className="space-y-4 border-t border-white/5 pt-6">
                 <h3 className="text-sm font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2">
-                  <MapPin size={16} /> Route & Logistics
+                  <MapPin size={16} /> {t('orders.route_info')}
                 </h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">Pickup Address</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">{t('orders.pickup')}</label>
                     <input 
                       type="text" required value={formData.pickupAddress}
                       onChange={(e) => setFormData({...formData, pickupAddress: e.target.value})}
@@ -609,7 +611,7 @@ const OrdersPage: React.FC = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">Delivery Address</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">{t('orders.delivery')}</label>
                     <input 
                       type="text" required value={formData.deliveryAddress}
                       onChange={(e) => setFormData({...formData, deliveryAddress: e.target.value})}
@@ -626,11 +628,11 @@ const OrdersPage: React.FC = () => {
               {/* Section: Package Details */}
               <div className="space-y-4 border-t border-white/5 pt-6">
                 <h3 className="text-sm font-black text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                  <Package size={16} /> Package Details
+                  <Package size={16} /> {t('orders.package_details')}
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">Weight (kg) ⚖️</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">{t('orders.weight_kg')} ⚖️</label>
                     <input 
                       type="number" step="0.1" value={formData.weight}
                       onChange={(e) => setFormData({...formData, weight: e.target.value})}
@@ -639,7 +641,7 @@ const OrdersPage: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">Type</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">{t('orders.package_type')}</label>
                     <select 
                       value={formData.packageType}
                       onChange={(e) => setFormData({...formData, packageType: e.target.value})}
@@ -654,7 +656,7 @@ const OrdersPage: React.FC = () => {
                     </select>
                   </div>
                   <div className="col-span-2 space-y-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">Description</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">{t('vendors.description')}</label>
                     <input 
                       type="text" value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
@@ -668,11 +670,11 @@ const OrdersPage: React.FC = () => {
               {/* Section: Timing & Pricing */}
               <div className="space-y-4 border-t border-white/5 pt-6">
                 <h3 className="text-sm font-black text-violet-400 uppercase tracking-widest flex items-center gap-2">
-                  <Clock size={16} /> Timing & Pricing
+                  <Clock size={16} /> {t('orders.timing_pricing')}
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">Requested At</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">{t('orders.requested_at')}</label>
                     <input 
                       type="date" value={formData.requestedAt}
                       onChange={(e) => setFormData({...formData, requestedAt: e.target.value})}
@@ -680,7 +682,7 @@ const OrdersPage: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">Price ($) 💰</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">{t('orders.amount')} ($) 💰</label>
                     <input 
                       type="number" step="0.01" required value={formData.price}
                       onChange={(e) => setFormData({...formData, price: e.target.value})}
@@ -688,7 +690,7 @@ const OrdersPage: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">Delivery Type</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">{t('orders.delivery_type')}</label>
                     <select 
                       value={formData.deliveryType}
                       onChange={(e) => setFormData({...formData, deliveryType: e.target.value})}
@@ -699,7 +701,7 @@ const OrdersPage: React.FC = () => {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">Payment</label>
+                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase">{t('orders.payment_method')}</label>
                     <select 
                       value={formData.paymentMethod}
                       onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
@@ -715,7 +717,7 @@ const OrdersPage: React.FC = () => {
               {/* Section: Attachments */}
               <div className="space-y-4 border-t border-white/5 pt-6 pb-6">
                 <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <Paperclip size={16} /> Attachments
+                  <Paperclip size={16} /> {t('orders.attachments')}
                 </h3>
                 <div className="flex flex-wrap gap-3">
                   {formData.attachments.map((file: any, index: number) => (
@@ -739,16 +741,16 @@ const OrdersPage: React.FC = () => {
                   ))}
                   <label className="w-20 h-20 rounded-xl bg-white/5 border border-dashed border-white/20 flex flex-col items-center justify-center cursor-pointer hover:border-primary-500/50 hover:bg-white/10 transition-all text-slate-500">
                     <Upload size={20} className="mb-1" />
-                    <span className="text-[10px] font-bold">Add</span>
+                    <span className="text-[10px] font-bold">{t('orders.add_file')}</span>
                     <input type="file" multiple className="hidden" onChange={handleFileUpload} />
                   </label>
                 </div>
               </div>
 
               <div className="pt-4 flex gap-4 sticky bottom-0 bg-slate-950/50 backdrop-blur-md py-4 border-t border-white/10">
-                <Button type="button" variant="secondary" className="flex-1" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                <Button type="button" variant="secondary" className="flex-1" onClick={() => setIsModalOpen(false)}>{t('common.cancel')}</Button>
                 <Button type="submit" className="flex-1" icon={isSubmitting ? Loader2 : Save} disabled={isSubmitting}>
-                  {isSubmitting ? 'Saving...' : (editingOrder ? 'Update Order' : 'Create Order')}
+                  {isSubmitting ? t('common.saving') : (editingOrder ? t('orders.edit_order') : t('orders.create_order'))}
                 </Button>
               </div>
             </form>
@@ -768,10 +770,9 @@ const OrdersPage: React.FC = () => {
                 <AlertTriangle size={40} className="text-rose-500" />
               </div>
               
-              <h2 className="text-2xl font-black mb-2">Delete Order?</h2>
+              <h2 className="text-2xl font-black mb-2">{t('orders.delete_title')}</h2>
               <p className="text-slate-400 mb-8 leading-relaxed">
-                You are about to delete order <span className="text-white font-bold">#{orderToDelete?.id.substring(0, 8)}</span>. 
-                This action is permanent and cannot be undone.
+                {t('orders.delete_warning', { id: orderToDelete?.id.substring(0, 8) })}
               </p>
 
               <div className="flex gap-4 w-full">
@@ -781,7 +782,7 @@ const OrdersPage: React.FC = () => {
                   onClick={() => setIsDeleteModalOpen(false)}
                   disabled={isSubmitting}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button 
                   className="flex-1 !bg-rose-500 hover:!bg-rose-600 !text-white shadow-lg shadow-rose-500/20"
@@ -789,7 +790,7 @@ const OrdersPage: React.FC = () => {
                   icon={isSubmitting ? Loader2 : Trash2}
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Deleting...' : 'Delete Order'}
+                  {isSubmitting ? t('common.deleting') : t('common.delete')}
                 </Button>
               </div>
             </div>
@@ -807,7 +808,7 @@ const OrdersPage: React.FC = () => {
                   <Package size={24} />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">Order Details</h2>
+                  <h2 className="text-2xl font-bold">{t('orders.order_details')}</h2>
                   <p className="text-xs text-slate-500 font-bold tracking-widest uppercase">#{viewingOrder.id}</p>
                 </div>
               </div>
@@ -820,7 +821,7 @@ const OrdersPage: React.FC = () => {
               {/* Column 1: Customer & Logistics */}
               <div className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.2em] mb-2">Customer</h3>
+                  <h3 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.2em] mb-2">{t('orders.customer_info')}</h3>
                   <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
                     <p className="text-lg font-bold text-white mb-1">{viewingOrder.clientName}</p>
                     <p className="text-sm text-slate-400 flex items-center gap-2">
@@ -834,12 +835,12 @@ const OrdersPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-2">Delivery Type</h3>
+                  <h3 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-2">{t('orders.delivery_type')}</h3>
                   <div className="flex gap-2">
                     <Badge variant={viewingOrder.deliveryType === 'PREMIUM' ? 'warning' : 'secondary'}>
                       {viewingOrder.deliveryType}
                     </Badge>
-                    <Badge variant="primary">{viewingOrder.paymentMethod.replace('_', ' ')}</Badge>
+                    <Badge variant="primary">{t(`orders.types.${viewingOrder.paymentMethod.toLowerCase()}`, { defaultValue: viewingOrder.paymentMethod.replace('_', ' ') })}</Badge>
                   </div>
                 </div>
               </div>
@@ -847,12 +848,12 @@ const OrdersPage: React.FC = () => {
               {/* Column 2: Route & Timing */}
               <div className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-[10px] font-black text-violet-400 uppercase tracking-[0.2em] mb-2">Timeline</h3>
+                  <h3 className="text-[10px] font-black text-violet-400 uppercase tracking-[0.2em] mb-2">{t('orders.timeline')}</h3>
                   <div className="space-y-3">
                     <div className="flex items-start gap-3">
                       <Clock size={16} className="text-violet-400 mt-1" />
                       <div>
-                        <p className="text-xs text-slate-500 font-bold">Requested For</p>
+                        <p className="text-xs text-slate-500 font-bold">{t('orders.requested_for')}</p>
                         <p className="text-sm font-semibold">{new Date(viewingOrder.requestedAt).toLocaleDateString()} {viewingOrder.deliveryTimeSlot}</p>
                       </div>
                     </div>
@@ -860,19 +861,19 @@ const OrdersPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-[10px] font-black text-rose-400 uppercase tracking-[0.2em] mb-2">Addresses</h3>
+                  <h3 className="text-[10px] font-black text-rose-400 uppercase tracking-[0.2em] mb-2">{t('orders.addresses')}</h3>
                   <div className="space-y-4 relative before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-[2px] before:bg-white/5">
                     <div className="flex items-start gap-3 relative">
                       <div className="w-4 h-4 rounded-full bg-emerald-500/20 border-2 border-emerald-500 z-10 mt-1" />
                       <div>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase">Pickup</p>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase">{t('orders.pickup')}</p>
                         <p className="text-xs font-medium text-slate-300">{viewingOrder.pickupAddress}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3 relative">
                       <div className="w-4 h-4 rounded-full bg-rose-500/20 border-2 border-rose-500 z-10 mt-1" />
                       <div>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase">Delivery</p>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase">{t('orders.delivery')}</p>
                         <p className="text-xs font-medium text-slate-300">{viewingOrder.deliveryAddress}</p>
                       </div>
                     </div>
@@ -883,14 +884,14 @@ const OrdersPage: React.FC = () => {
               {/* Column 3: Package & Price */}
               <div className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-[10px] font-black text-amber-400 uppercase tracking-[0.2em] mb-2">Package Specs</h3>
+                  <h3 className="text-[10px] font-black text-amber-400 uppercase tracking-[0.2em] mb-2">{t('orders.package_specs')}</h3>
                   <div className="bg-white/5 p-4 rounded-2xl border border-white/5 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-500">Type</span>
+                      <span className="text-xs text-slate-500">{t('orders.package_type')}</span>
                       <span className="text-xs font-bold text-slate-200">{viewingOrder.packageType}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-500">Weight</span>
+                      <span className="text-xs text-slate-500">{t('orders.weight_kg')}</span>
                       <span className="text-xs font-bold text-slate-200">{viewingOrder.weight || 'N/A'} kg</span>
                     </div>
                     <p className="text-xs text-slate-400 border-t border-white/5 pt-2 mt-2">{viewingOrder.description || 'No description provided.'}</p>
@@ -898,14 +899,14 @@ const OrdersPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Total Price</h3>
+                  <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{t('orders.amount')}</h3>
                   <p className="text-4xl font-black text-primary-400 tracking-tighter">${parseFloat(viewingOrder.price).toFixed(2)}</p>
                 </div>
               </div>
             </div>
 
             <div className="space-y-4 pt-6 border-t border-white/10">
-              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Attached Evidence & Docs</h3>
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t('orders.evidence_docs')}</h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {viewingOrder.attachments && viewingOrder.attachments.length > 0 ? (
                   viewingOrder.attachments.map((file: any, i: number) => (
@@ -923,21 +924,21 @@ const OrdersPage: React.FC = () => {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                         <span className="text-xs font-bold text-white px-3 py-1 bg-primary-500 rounded-full">View Full</span>
+                         <span className="text-xs font-bold text-white px-3 py-1 bg-primary-500 rounded-full">{t('orders.view_full')}</span>
                       </div>
                     </button>
                   ))
                 ) : (
                   <div className="col-span-full py-8 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
                     <Paperclip size={24} className="mx-auto text-slate-600 mb-2" />
-                    <p className="text-xs text-slate-500">No attachments found for this order.</p>
+                    <p className="text-xs text-slate-500">{t('orders.no_attachments')}</p>
                   </div>
                 )}
               </div>
             </div>
 
             <div className="mt-10 flex justify-end">
-              <Button onClick={() => setViewingOrder(null)}>Close Details</Button>
+              <Button onClick={() => setViewingOrder(null)}>{t('vendors.close_details')}</Button>
             </div>
           </GlassCard>
         </div>

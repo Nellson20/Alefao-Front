@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Package, Plus, ClipboardList, TrendingUp, Clock, MapPin, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import GlassCard from '../components/ui/GlassCard';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { orderService } from '../services/api';
 
 const VendorDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -40,11 +42,11 @@ const VendorDashboard: React.FC = () => {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Store Management</h1>
-          <p className="text-slate-500">Manage your menu, orders, and delivery status</p>
+          <h1 className="text-3xl font-bold">{t('common.shop_dashboard')}</h1>
+          <p className="text-slate-500">{t('dashboard.welcome.vendor', { count: incomingOrdersCount })}</p>
         </div>
         <Button icon={Plus}>
-          Add New Product
+          {t('inventory.add_item')}
         </Button>
       </div>
 
@@ -55,10 +57,10 @@ const VendorDashboard: React.FC = () => {
             <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
               <ClipboardList size={24} />
             </div>
-            <h3 className="text-lg font-bold">Incoming Orders</h3>
+            <h3 className="text-lg font-bold">{t('common.new_orders')}</h3>
           </div>
           <p className="text-3xl font-black text-emerald-400 mb-2">{incomingOrdersCount}</p>
-          <p className="text-sm text-slate-400">Ready for preparation</p>
+          <p className="text-sm text-slate-400">{t('dashboard.welcome.vendor', { count: incomingOrdersCount })}</p>
         </GlassCard>
 
         <GlassCard className="bg-gradient-to-br from-primary-600/20 to-primary-900/40 border-primary-500/20">
@@ -66,10 +68,10 @@ const VendorDashboard: React.FC = () => {
             <div className="w-12 h-12 rounded-2xl bg-primary-500/20 text-primary-400 flex items-center justify-center">
               <Package size={24} />
             </div>
-            <h3 className="text-lg font-bold">Active Deliveries</h3>
+            <h3 className="text-lg font-bold">{t('dashboard.stats.active_orders')}</h3>
           </div>
           <p className="text-3xl font-black text-primary-400 mb-2">{activeDeliveriesCount}</p>
-          <p className="text-sm text-slate-400">Drivers on their way</p>
+          <p className="text-sm text-slate-400">{t('dashboard.stats.completed_deliveries')}</p>
         </GlassCard>
 
         <GlassCard className="bg-gradient-to-br from-violet-600/20 to-violet-900/40 border-violet-500/20">
@@ -77,10 +79,10 @@ const VendorDashboard: React.FC = () => {
             <div className="w-12 h-12 rounded-2xl bg-violet-500/20 text-violet-400 flex items-center justify-center">
               <TrendingUp size={24} />
             </div>
-            <h3 className="text-lg font-bold">Total Earnings</h3>
+            <h3 className="text-lg font-bold">{t('dashboard.stats.total_earned')}</h3>
           </div>
           <p className="text-3xl font-black text-violet-400 mb-2">${totalEarnings.toLocaleString()}</p>
-          <p className="text-sm text-slate-400">Lifetime store revenue</p>
+          <p className="text-sm text-slate-400">{t('dashboard.stats.total_revenue')}</p>
         </GlassCard>
       </div>
 
@@ -90,7 +92,7 @@ const VendorDashboard: React.FC = () => {
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-xl font-bold flex items-center gap-3">
               <Clock className="text-primary-400" size={24} />
-              Live Preparations
+              {t('common.recent_activity')}
             </h2>
           </div>
           <div className="space-y-4">
@@ -98,10 +100,10 @@ const VendorDashboard: React.FC = () => {
               <div key={i} className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-bold text-lg">Order #{order.id.substring(0, 8)}</h4>
-                    <p className="text-sm text-slate-400">{order.items?.map((item: any) => `${item.quantity}x ${item.name}`).join(', ') || 'No items listed'}</p>
+                    <h4 className="font-bold text-lg">{t('common.orders')} #{order.id.substring(0, 8)}</h4>
+                    <p className="text-sm text-slate-400">{order.items?.map((item: any) => `${item.quantity}x ${item.name}`).join(', ') || t('common.no_data')}</p>
                   </div>
-                  <Badge variant={order.status === 'PENDING' ? 'warning' : 'primary'}>{order.status}</Badge>
+                  <Badge variant={order.status === 'PENDING' ? 'warning' : 'primary'}>{t(`orders.status.${order.status.toLowerCase()}`, { defaultValue: order.status })}</Badge>
                 </div>
                 <div className="flex items-center gap-6 pt-4 border-t border-white/5">
                   <div className="flex items-center gap-2">
@@ -110,12 +112,12 @@ const VendorDashboard: React.FC = () => {
                   </div>
                   <div className={`flex items-center gap-2 ${order.driver ? 'text-primary-400' : 'text-slate-500'}`}>
                     <MapPin size={16} />
-                    <span className="text-sm">{order.driver ? 'Driver Assigned' : 'Looking for Driver'}</span>
+                    <span className="text-sm">{order.driver ? t('orders.driver_assigned') || 'Driver Assigned' : t('orders.looking_for_driver') || 'Looking for Driver'}</span>
                   </div>
                 </div>
               </div>
             ))}
-            {orders.length === 0 && <p className="text-slate-500 text-center py-4">No active preparations.</p>}
+            {orders.length === 0 && <p className="text-slate-500 text-center py-4">{t('common.no_data')}</p>}
           </div>
         </GlassCard>
 
@@ -123,7 +125,7 @@ const VendorDashboard: React.FC = () => {
         <GlassCard>
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-xl font-bold">Popular Items</h2>
-            <button className="text-sm text-primary-400 font-bold hover:underline">Manage Menu</button>
+            <button className="text-sm text-primary-400 font-bold hover:underline" onClick={() => window.location.href='/inventory'}>{t('common.manage')} Menu</button>
           </div>
           <div className="grid grid-cols-2 gap-4">
             {[
@@ -132,11 +134,11 @@ const VendorDashboard: React.FC = () => {
               { name: 'Veggie Pizza', sales: 28, price: '$16.50', image: '🍕' },
               { name: 'Caesar Salad', sales: 24, price: '$10.00', image: '🥗' },
             ].map((item, i) => (
-              <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center">
-                <div className="text-4xl mb-3">{item.image}</div>
-                <h4 className="font-semibold text-sm mb-1">{item.name}</h4>
-                <p className="text-xs text-slate-500 mb-2">{item.sales} sold today</p>
-                <p className="text-primary-400 font-bold">{item.price}</p>
+              <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center flex flex-col items-center min-w-0">
+                <div className="text-3xl mb-2">{item.image}</div>
+                <h4 className="font-semibold text-xs mb-1 truncate w-full">{item.name}</h4>
+                <p className="text-[10px] text-slate-500 mb-2">{item.sales} sold</p>
+                <p className="text-primary-400 font-bold text-sm">{item.price}</p>
               </div>
             ))}
           </div>

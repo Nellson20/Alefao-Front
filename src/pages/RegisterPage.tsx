@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus, Mail, Lock, Truck, Store, User, Phone, MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { authService } from '../services/api';
 import Button from '../components/ui/Button';
 
 const RegisterPage: React.FC = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -50,7 +52,7 @@ const RegisterPage: React.FC = () => {
     try {
       await authService.register(payload);
       // After registration, redirect to login
-      navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
+      navigate('/login', { state: { message: t('auth.register_success') || 'Registration successful! Please log in.' } });
     } catch (err: any) {
       console.error('Registration failed:', err);
       const errorData = err.response?.data?.message;
@@ -67,9 +69,9 @@ const RegisterPage: React.FC = () => {
           else if (lowerMsg.includes('phone') || lowerMsg.includes('téléphone')) newErrors.phoneNumber = msg;
         });
         setFieldErrors(newErrors);
-        setError('Please fix the errors below.');
+        setError(t('auth.fix_errors'));
       } else {
-        setError(errorData || 'Failed to create account. Please try again.');
+        setError(errorData || t('auth.register_error') || 'Failed to create account. Please try again.');
       }
       setIsLoading(false);
     }
@@ -90,8 +92,8 @@ const RegisterPage: React.FC = () => {
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-2xl shadow-primary-500/40 mb-6 transform rotate-6">
             <UserPlus size={32} className="text-white" />
           </div>
-          <h1 className="text-4xl font-black mb-3 tracking-tight">Join <span className="text-primary-500">Alefao</span></h1>
-          <p className="text-slate-400 font-medium">Create your account and start delivering</p>
+          <h1 className="text-4xl font-black mb-3 tracking-tight">{t('common.join')} <span className="text-primary-500">Alefao</span></h1>
+          <p className="text-slate-400 font-medium">{t('auth.register_subtitle')}</p>
         </div>
 
         {error && (
@@ -112,7 +114,7 @@ const RegisterPage: React.FC = () => {
               }`}
             >
               <r.icon size={24} className={formData.role === r.id ? r.color : 'text-slate-500'} />
-              <span className="text-xs font-bold uppercase tracking-wider">{r.label} Account</span>
+              <span className="text-xs font-bold uppercase tracking-wider">{t(`common.${r.id}`)} {t('auth.account')}</span>
             </button>
           ))}
         </div>
@@ -120,7 +122,7 @@ const RegisterPage: React.FC = () => {
         <form onSubmit={handleRegister} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">First Name</label>
+              <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">{t('auth.first_name')}</label>
               <div className="relative group">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-500 transition-colors" size={20} />
                 <input
@@ -134,7 +136,7 @@ const RegisterPage: React.FC = () => {
               {fieldErrors.firstName && <p className="text-rose-400 text-xs font-medium mt-1 ml-1">{fieldErrors.firstName}</p>}
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">Last Name</label>
+              <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">{t('auth.last_name')}</label>
               <div className="relative group">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-500 transition-colors" size={20} />
                 <input
@@ -150,7 +152,7 @@ const RegisterPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">Email Address</label>
+            <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">{t('auth.email')}</label>
             <div className="relative group">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-500 transition-colors" size={20} />
               <input
@@ -165,7 +167,7 @@ const RegisterPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">Password</label>
+            <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">{t('auth.password')}</label>
             <div className="relative group">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-500 transition-colors" size={20} />
               <input
@@ -182,7 +184,7 @@ const RegisterPage: React.FC = () => {
           {formData.role === 'vendor' && (
             <>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">Shop Name</label>
+                <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">{t('profile.shop_name')}</label>
                 <div className="relative group">
                   <Store className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-500 transition-colors" size={20} />
                   <input
@@ -196,7 +198,7 @@ const RegisterPage: React.FC = () => {
                 {fieldErrors.shopName && <p className="text-rose-400 text-xs font-medium mt-1 ml-1">{fieldErrors.shopName}</p>}
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">Shop Address</label>
+                <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">{t('profile.shop_address')}</label>
                 <div className="relative group">
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-500 transition-colors" size={20} />
                   <input
@@ -214,7 +216,7 @@ const RegisterPage: React.FC = () => {
 
           {(formData.role === 'vendor' || formData.role === 'driver') && (
             <div>
-              <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">Phone Number (Optional)</label>
+              <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">{t('auth.phone_number')}</label>
               <div className="relative group">
                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-500 transition-colors" size={20} />
                 <input
@@ -234,13 +236,13 @@ const RegisterPage: React.FC = () => {
             className="w-full py-4 text-lg shadow-2xl shadow-primary-500/20"
             isLoading={isLoading}
           >
-            Create Account
+            {t('auth.register')}
           </Button>
         </form>
 
         <p className="mt-10 text-center text-slate-500 text-sm font-medium">
-          Already have an account? 
-          <Link to="/login" className="text-primary-400 hover:underline ml-2 font-bold">Sign In</Link>
+          {t('auth.already_have_account')} 
+          <Link to="/login" className="text-primary-400 hover:underline ml-2 font-bold">{t('auth.login_now')}</Link>
         </p>
       </div>
     </div>

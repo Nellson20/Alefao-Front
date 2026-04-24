@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { LogIn, Mail, Lock, Truck, Store, Shield } from 'lucide-react';
+import Cookies from 'js-cookie';
+import { useTranslation } from 'react-i18next';
 import { authService } from '../services/api';
 import Button from '../components/ui/Button';
 
 import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage: React.FC = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +33,7 @@ const LoginPage: React.FC = () => {
       const { accessToken, refreshToken } = response.data;
       
       login(accessToken, refreshToken);
-      const actualRole = localStorage.getItem('role') || role;
+      const actualRole = Cookies.get('role') || role;
       
       navigate(`/${actualRole}`);
     } catch (err: any) {
@@ -45,18 +48,18 @@ const LoginPage: React.FC = () => {
           else if (lowerMsg.includes('password') || lowerMsg.includes('mot de passe')) newErrors.password = msg;
         });
         setFieldErrors(newErrors);
-        setError('Please fix the errors below.');
+        setError(t('auth.fix_errors'));
       } else {
-        setError(errorData || 'Invalid credentials.');
+        setError(errorData || t('auth.invalid_credentials'));
       }
       setIsLoading(false);
     }
   };
 
   const roles = [
-    { id: 'admin', label: 'Admin', icon: Shield, color: 'text-primary-400' },
-    { id: 'vendor', label: 'Vendor', icon: Store, color: 'text-emerald-400' },
-    { id: 'driver', label: 'Driver', icon: Truck, color: 'text-amber-400' },
+    { id: 'admin', label: t('common.user'), icon: Shield, color: 'text-primary-400' },
+    { id: 'vendor', label: t('common.vendors'), icon: Store, color: 'text-emerald-400' },
+    { id: 'driver', label: t('common.drivers'), icon: Truck, color: 'text-amber-400' },
   ];
 
   return (
@@ -70,7 +73,7 @@ const LoginPage: React.FC = () => {
             <img src="/logo.png" alt="Logo" className="w-25 h-25" />
           </div>
           <h1 className="text-4xl font-black mb-3 tracking-tight">Alefao <span className="text-primary-500">Express</span></h1>
-          <p className="text-slate-400 font-medium">Log in to your specialized dashboard</p>
+          <p className="text-slate-400 font-medium">{t('auth.login_subtitle')}</p>
         </div>
 
         {successMessage && (
@@ -104,7 +107,7 @@ const LoginPage: React.FC = () => {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">Email Address</label>
+            <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">{t('auth.email')}</label>
             <div className="relative group">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-500 transition-colors" size={20} />
               <input
@@ -119,7 +122,7 @@ const LoginPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">Password</label>
+            <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">{t('auth.password')}</label>
             <div className="relative group">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-500 transition-colors" size={20} />
               <input
@@ -138,13 +141,13 @@ const LoginPage: React.FC = () => {
             className="w-full py-4 text-lg shadow-2xl shadow-primary-500/20"
             isLoading={isLoading}
           >
-            Login as {role.charAt(0).toUpperCase() + role.slice(1)}
+            {t('auth.login')}
           </Button>
         </form>
 
         <p className="mt-10 text-center text-slate-500 text-sm font-medium">
-          Don't have an account? 
-          <Link to="/register" className="text-primary-400 hover:underline ml-2 font-bold">Register Now</Link>
+          {t('auth.dont_have_account')} 
+          <Link to="/register" className="text-primary-400 hover:underline ml-2 font-bold">{t('auth.register_now')}</Link>
         </p>
       </div>
     </div>

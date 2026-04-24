@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { MapPin, Navigation, Clock, ShieldCheck, DollarSign, ListChecks, Loader2, Package } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import GlassCard from '../components/ui/GlassCard';
 import Button from '../components/ui/Button';
 import StatCard from '../components/ui/StatCard';
 import { orderService } from '../services/api';
 
 const DriverDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -43,11 +45,11 @@ const DriverDashboard: React.FC = () => {
         <GlassCard className="border-primary-500/30 bg-gradient-to-r from-primary-900/20 to-transparent relative overflow-hidden">
           <div className="flex flex-col md:flex-row gap-8 relative z-10">
             <div className="flex-1 space-y-6">
-              <div className="flex items-center gap-2 text-primary-400 font-bold uppercase tracking-widest text-xs">
+              <div className="flex items-center gap-2 text-primary-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
                 <div className="w-2 h-2 rounded-full bg-primary-400 animate-pulse" />
-                Current Delivery: {activeOrder.status}
+                {t('dashboard.stats.active_orders')}: {t(`orders.status.${activeOrder.status.toLowerCase()}`, { defaultValue: activeOrder.status })}
               </div>
-              <h2 className="text-3xl font-black">Order #{activeOrder.id.substring(0, 8)}</h2>
+              <h2 className="text-2xl md:text-4xl font-black tracking-tight">{t('common.orders')} #{activeOrder.id.substring(0, 8)}</h2>
               
               <div className="space-y-4">
                 <div className="flex gap-4">
@@ -58,23 +60,23 @@ const DriverDashboard: React.FC = () => {
                   </div>
                   <div className="space-y-6">
                     <div>
-                      <p className="text-xs text-slate-500 uppercase font-bold">Pickup</p>
-                      <p className="font-semibold">{activeOrder.pickupAddress || 'Restaurant Address'}</p>
+                      <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{t('orders.pickup')}</p>
+                      <p className="font-semibold text-sm md:text-base leading-tight">{activeOrder.pickupAddress || 'Restaurant Address'}</p>
                     </div>
                     <div className="pt-2">
-                      <p className="text-xs text-slate-500 uppercase font-bold">Dropoff</p>
-                      <p className="font-semibold">{activeOrder.deliveryAddress || 'Customer Address'}</p>
+                      <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{t('orders.delivery')}</p>
+                      <p className="font-semibold text-sm md:text-base leading-tight">{activeOrder.deliveryAddress || 'Customer Address'}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-4 pt-4">
-                <Button icon={Navigation} className="flex-1">
-                  Open Navigation
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-4">
+                <Button icon={Navigation} className="flex-1 py-3 md:py-4">
+                  {t('dashboard.welcome.driver_nav') || 'Open Navigation'}
                 </Button>
-                <Button variant="secondary" className="flex-1">
-                  {activeOrder.status === 'ACCEPTED' ? 'Confirm Pickup' : 'Confirm Delivery'}
+                <Button variant="secondary" className="flex-1 py-3 md:py-4">
+                  {activeOrder.status === 'ACCEPTED' ? t('orders.pickup_confirm') : t('orders.deliver_confirm')}
                 </Button>
               </div>
             </div>
@@ -83,7 +85,7 @@ const DriverDashboard: React.FC = () => {
                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800')] bg-cover opacity-40 mix-blend-luminosity" />
                <div className="relative flex flex-col items-center gap-2">
                  <Navigation className="text-primary-400 animate-bounce" size={48} />
-                 <p className="text-xs font-bold text-white uppercase tracking-widest">Navigation Active</p>
+                 <p className="text-xs font-bold text-white uppercase tracking-widest">{t('dashboard.welcome.driver_nav_active') || 'Navigation Active'}</p>
                </div>
             </div>
           </div>
@@ -93,23 +95,23 @@ const DriverDashboard: React.FC = () => {
           <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
             <Package className="text-slate-500" size={32} />
           </div>
-          <h2 className="text-xl font-bold mb-2">No Active Delivery</h2>
-          <p className="text-slate-500 mb-6">Check for available jobs to start earning.</p>
-          <Button>View Available Jobs</Button>
+          <h2 className="text-xl font-bold mb-2">{t('dashboard.stats.active_orders')}: 0</h2>
+          <p className="text-slate-500 mb-6">{t('dashboard.welcome.driver_no_active') || 'Check for available jobs to start earning.'}</p>
+          <Button onClick={() => window.location.href='/available-jobs'}>{t('common.available_jobs')}</Button>
         </GlassCard>
       )}
 
       {/* Driver Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard label="Today Earnings" value={`$${todayEarnings.toFixed(2)}`} icon={DollarSign} color="emerald" trend="+12%" isUp={true} />
-        <StatCard label="Total Deliveries" value={completedOrders.length.toString()} icon={ListChecks} color="blue" />
+        <StatCard label={t('dashboard.stats.total_earned')} value={`$${todayEarnings.toFixed(2)}`} icon={DollarSign} color="emerald" trend="+12%" isUp={true} />
+        <StatCard label={t('dashboard.stats.completed_deliveries')} value={completedOrders.length.toString()} icon={ListChecks} color="blue" />
         <StatCard label="Safety Score" value="98%" icon={ShieldCheck} color="primary" />
         <StatCard label="Drive Time" value="5h 22m" icon={Clock} color="amber" />
       </div>
 
       {/* History Table */}
       <GlassCard>
-        <h3 className="text-xl font-bold mb-6">Recent Earnings</h3>
+        <h3 className="text-xl font-bold mb-6">{t('common.recent_activity')}</h3>
         <div className="space-y-2">
           {completedOrders.slice(0, 5).map((order, i) => (
             <div key={i} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/5">
@@ -118,17 +120,17 @@ const DriverDashboard: React.FC = () => {
                    <Clock size={18} className="text-slate-500" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">Delivery Order #{order.id.substring(0, 8)}</p>
+                  <p className="font-semibold text-sm">{t('common.orders')} #{order.id.substring(0, 8)}</p>
                   <p className="text-xs text-slate-500">{new Date(order.updatedAt).toLocaleString()}</p>
                 </div>
               </div>
               <div className="text-right">
                 <p className="font-bold text-emerald-400">+${(order.deliveryFee || 10).toFixed(2)}</p>
-                <p className="text-xs text-slate-500">Completed</p>
+                <p className="text-xs text-slate-500">{t('orders.status.delivered')}</p>
               </div>
             </div>
           ))}
-          {completedOrders.length === 0 && <p className="text-slate-500 text-center py-4">No completed deliveries yet.</p>}
+          {completedOrders.length === 0 && <p className="text-slate-500 text-center py-4">{t('common.no_data')}</p>}
         </div>
       </GlassCard>
     </div>

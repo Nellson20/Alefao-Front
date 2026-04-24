@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const API_BASE_URL_PREFIX = '/api';
@@ -12,7 +13,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = Cookies.get('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -29,8 +30,8 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        // Even if no refreshToken in localStorage, we try the request because it might be in cookies
+        const refreshToken = Cookies.get('refreshToken');
+        // Even if no refreshToken in Cookies, we try the request because it might be in HttpOnly cookies
         
         const response = await axios.post(`${API_BASE_URL}${API_BASE_URL_PREFIX}/auth/refresh`, {}, {
           withCredentials: true,
@@ -41,15 +42,15 @@ api.interceptors.response.use(
 
         const { accessToken, refreshToken: newRefreshToken } = response.data;
 
-        localStorage.setItem('token', accessToken);
-        localStorage.setItem('refreshToken', newRefreshToken);
+        Cookies.set('token', accessToken, { expires: 7, sameSite: 'strict' });
+        Cookies.set('refreshToken', newRefreshToken, { expires: 30, sameSite: 'strict' });
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('role');
+        Cookies.remove('token');
+        Cookies.remove('refreshToken');
+        Cookies.remove('role');
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }
@@ -70,6 +71,7 @@ export const userService = {
   updateProfile: (data: any) => api.patch('/users/me', data),
   getVendors: (params?: any) => api.get('/users/vendors', { params }),
   getDrivers: (params?: any) => api.get('/users/drivers', { params }),
+  deleteUser: (id: string) => api.delete(`/users/${id}`),
 };
 
 export const orderService = {
