@@ -1,10 +1,12 @@
 import React from 'react';
-import { Users, Search, Filter, Mail, Phone, MapPin, Loader2, Star } from 'lucide-react';
+import { Search, Mail, Phone, MapPin, Loader2, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import GlassCard from '../components/ui/GlassCard';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
-import { userService } from '../services/api';
+
+// Modules
+import { userRepository } from '../modules/users/infrastructure/user.repository';
 
 const VendorsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -15,8 +17,8 @@ const VendorsPage: React.FC = () => {
   React.useEffect(() => {
     const fetchVendors = async () => {
       try {
-        const response = await userService.getVendors();
-        setVendors(response.data.data || response.data);
+        const data = await userRepository.getVendors();
+        setVendors(data);
       } catch (error) {
         console.error('Failed to fetch vendors:', error);
       } finally {
@@ -30,7 +32,7 @@ const VendorsPage: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm(t('common.confirm_delete', { item: 'vendor' }))) {
       try {
-        await userService.deleteUser(id);
+        await userRepository.deleteUser(id);
         setVendors(vendors.filter(v => v.id !== id));
       } catch (error) {
         console.error('Failed to delete vendor:', error);

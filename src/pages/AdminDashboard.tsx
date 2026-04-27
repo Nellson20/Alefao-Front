@@ -4,7 +4,10 @@ import { useTranslation } from 'react-i18next';
 import StatCard from '../components/ui/StatCard';
 import GlassCard from '../components/ui/GlassCard';
 import Button from '../components/ui/Button';
-import { orderService, userService } from '../services/api';
+
+// Modules
+import { orderRepository } from '../modules/orders/infrastructure/order.repository';
+import { userRepository } from '../modules/users/infrastructure/user.repository';
 
 const AdminDashboard: React.FC = () => {
   const { t } = useTranslation();
@@ -21,20 +24,17 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [ordersResponse, vendorsResponse] = await Promise.all([
-          orderService.getAllOrders(),
-          userService.getVendors()
+        const [ordersData, vendorsData] = await Promise.all([
+          orderRepository.getAll(),
+          userRepository.getVendors()
         ]);
         
-        const ordersData = ordersResponse.data.data || ordersResponse.data;
         setOrders(ordersData);
-        
-        const vendorsData = vendorsResponse.data.data || vendorsResponse.data;
         setVendors(vendorsData);
         
         // Calculate basic stats
         const totalOrders = ordersData.length;
-        const totalRevenue = ordersData.reduce((acc: number, order: any) => acc + (order.totalPrice || 0), 0);
+        const totalRevenue = ordersData.reduce((acc: number, order: any) => acc + (Number(order.price) || 0), 0);
         
         setStats([
           { label: t('dashboard.stats.total_revenue'), value: `$${totalRevenue.toLocaleString()}`, trend: '+12.5%', isUp: true, icon: DollarSign, color: 'emerald' },
@@ -101,7 +101,7 @@ const AdminDashboard: React.FC = () => {
                   <p className="text-sm text-slate-500">{t(`orders.status.${order.status.toLowerCase()}`, { defaultValue: order.status })} • {order.items?.length || 0} {t('orders.items').toLowerCase()}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-slate-200">{order.totalPrice ? `$${order.totalPrice}` : 'N/A'}</p>
+                  <p className="font-bold text-slate-200">{order.price ? `$${order.price}` : 'N/A'}</p>
                   <p className="text-xs text-slate-500">{new Date(order.createdAt).toLocaleDateString()}</p>
                 </div>
               </div>

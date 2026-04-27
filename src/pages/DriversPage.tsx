@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Truck, Search, Phone, Shield, Star, MapPin, Loader2 } from 'lucide-react';
+import { Truck, Shield, Star, MapPin, Loader2, Phone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import GlassCard from '../components/ui/GlassCard';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
-import { userService } from '../services/api';
+
+// Modules
+import { userRepository } from '../modules/users/infrastructure/user.repository';
 
 const DriversPage: React.FC = () => {
   const { t } = useTranslation();
@@ -14,8 +16,8 @@ const DriversPage: React.FC = () => {
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
-        const response = await userService.getDrivers();
-        setDrivers(response.data.data || response.data);
+        const data = await userRepository.getDrivers();
+        setDrivers(data);
       } catch (error) {
         console.error('Failed to fetch drivers:', error);
       } finally {
@@ -29,7 +31,7 @@ const DriversPage: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm(t('common.confirm_delete', { item: 'driver' }))) {
       try {
-        await userService.deleteUser(id);
+        await userRepository.deleteUser(id);
         setDrivers(drivers.filter(d => d.id !== id));
       } catch (error) {
         console.error('Failed to delete driver:', error);

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import Cookies from 'js-cookie';
-import { authService } from '../services/api';
+import { authRepository } from '../modules/auth/infrastructure/auth.repository';
 
 export function parseJwt(token: string) {
   try {
@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = async () => {
     try {
-      await authService.logout();
+      await authRepository.logout();
     } catch (e) {
       console.error('Logout failed:', e);
     } finally {

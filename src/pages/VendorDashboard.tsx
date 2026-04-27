@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 import GlassCard from '../components/ui/GlassCard';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
-import { orderService } from '../services/api';
+
+// Modules
+import { orderRepository } from '../modules/orders/infrastructure/order.repository';
 
 const VendorDashboard: React.FC = () => {
   const { t } = useTranslation();
@@ -14,8 +16,8 @@ const VendorDashboard: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await orderService.getVendorOrders();
-        setOrders(response.data.data || response.data);
+        const data = await orderRepository.getVendorOrders();
+        setOrders(data);
       } catch (error) {
         console.error('Failed to fetch vendor orders:', error);
       } finally {
@@ -28,7 +30,7 @@ const VendorDashboard: React.FC = () => {
 
   const incomingOrdersCount = orders.filter(o => o.status === 'PENDING').length;
   const activeDeliveriesCount = orders.filter(o => ['ACCEPTED', 'PICKED_UP'].includes(o.status)).length;
-  const totalEarnings = orders.reduce((acc, o) => acc + (o.totalPrice || 0), 0);
+  const totalEarnings = orders.reduce((acc, o) => acc + (Number(o.price) || 0), 0);
 
   if (isLoading) {
     return (
@@ -45,7 +47,7 @@ const VendorDashboard: React.FC = () => {
           <h1 className="text-3xl font-bold">{t('common.shop_dashboard')}</h1>
           <p className="text-slate-500">{t('dashboard.welcome.vendor', { count: incomingOrdersCount })}</p>
         </div>
-        <Button icon={Plus}>
+        <Button icon={Plus} onClick={() => window.location.href='/inventory'}>
           {t('inventory.add_item')}
         </Button>
       </div>

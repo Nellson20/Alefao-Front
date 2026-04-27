@@ -1,17 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { Package, Plus, Search, Edit2, Trash2, Loader2, X, Save, AlertCircle, AlertTriangle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Package, Plus, Edit2, Trash2, Loader2, X, Save, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { productService } from '../services/api';
 import GlassCard from '../components/ui/GlassCard';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 
+// Modules
+import { useProducts } from '../modules/products/application/useProducts';
+import { useProductActions } from '../modules/products/application/useProductActions';
+
 const InventoryPage: React.FC = () => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { products, isLoading, refresh } = useProducts();
+  const { createProduct, updateProduct, deleteProduct, isSubmitting } = useProductActions(refresh);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -24,22 +27,6 @@ const InventoryPage: React.FC = () => {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<any>(null);
-
-  const fetchProducts = async () => {
-    setIsLoading(true);
-    try {
-      const response = await productService.getMyProducts();
-      setProducts(response.data);
-    } catch (error) {
-      console.error('Failed to fetch products:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
 
   const handleOpenModal = (product: any = null) => {
     if (product) {
@@ -73,41 +60,24 @@ const InventoryPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!productToDelete) return;
-    setIsSubmitting(true);
-    try {
-      await productService.deleteProduct(productToDelete.id);
-      setProducts(products.filter(p => p.id !== productToDelete.id));
-      setIsDeleteModalOpen(false);
-      setProductToDelete(null);
-    } catch (error) {
-      console.error('Failed to delete product:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    await deleteProduct(productToDelete.id);
+    setIsDeleteModalOpen(false);
+    setProductToDelete(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        ...formData,
-        price: parseFloat(formData.price),
-      };
+    const payload = {
+      ...formData,
+      price: parseFloat(formData.price),
+    };
 
-      if (editingProduct) {
-        await productService.updateProduct(editingProduct.id, payload);
-      } else {
-        await productService.createProduct(payload);
-      }
-      
-      setIsModalOpen(false);
-      fetchProducts();
-    } catch (error) {
-      console.error('Failed to save product:', error);
-    } finally {
-      setIsSubmitting(false);
+    if (editingProduct) {
+      await updateProduct(editingProduct.id, payload);
+    } else {
+      await createProduct(payload);
     }
+    setIsModalOpen(false);
   };
 
   return (
@@ -192,8 +162,7 @@ const InventoryPage: React.FC = () => {
                 <div className="col-span-2 space-y-2">
                   <label className="text-sm font-bold text-slate-400 ml-1">{t('inventory.item_name')}</label>
                   <input 
-                    type="text" 
-                    required
+                    type="text" required
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     placeholder="e.g. Double Cheeseburger"
@@ -204,9 +173,7 @@ const InventoryPage: React.FC = () => {
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-400 ml-1">{t('inventory.item_price')}</label>
                   <input 
-                    type="number" 
-                    step="0.01"
-                    required
+                    type="number" step="0.01" required
                     value={formData.price}
                     onChange={(e) => setFormData({...formData, price: e.target.value})}
                     placeholder="0.00"
@@ -260,16 +227,13 @@ const InventoryPage: React.FC = () => {
 
               <div className="pt-4 flex gap-4">
                 <Button 
-                  type="button" 
-                  variant="secondary" 
-                  className="flex-1"
+                  type="button" variant="secondary" className="flex-1"
                   onClick={() => setIsModalOpen(false)}
                 >
                   {t('common.cancel')}
                 </Button>
                 <Button 
-                  type="submit" 
-                  className="flex-1"
+                  type="submit" className="flex-1"
                   icon={isSubmitting ? Loader2 : Save}
                   disabled={isSubmitting}
                 >
@@ -280,6 +244,7 @@ const InventoryPage: React.FC = () => {
           </GlassCard>
         </div>
       )}
+
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
@@ -299,8 +264,7 @@ const InventoryPage: React.FC = () => {
 
               <div className="flex gap-4 w-full">
                 <Button 
-                  variant="secondary" 
-                  className="flex-1"
+                  variant="secondary" className="flex-1"
                   onClick={() => setIsDeleteModalOpen(false)}
                   disabled={isSubmitting}
                 >

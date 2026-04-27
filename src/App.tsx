@@ -11,6 +11,7 @@ import DriversPage from './pages/DriversPage';
 import InventoryPage from './pages/InventoryPage';
 import AvailableJobsPage from './pages/AvailableJobsPage';
 import ProfilePage from './pages/ProfilePage';
+import CreateOrderPage from './pages/CreateOrderPage';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import './index.css';
@@ -35,6 +36,13 @@ function App() {
             <ProtectedRoute allowedRoles={['admin']}>
               <DashboardLayout role="admin">
                 <OrdersPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/orders/create" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <DashboardLayout role="admin">
+                <CreateOrderPage />
               </DashboardLayout>
             </ProtectedRoute>
           } />
@@ -72,6 +80,13 @@ function App() {
             <ProtectedRoute allowedRoles={['vendor']}>
               <DashboardLayout role="vendor">
                 <OrdersPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/vendor/orders/create" element={
+            <ProtectedRoute allowedRoles={['vendor']}>
+              <DashboardLayout role="vendor">
+                <CreateOrderPage />
               </DashboardLayout>
             </ProtectedRoute>
           } />

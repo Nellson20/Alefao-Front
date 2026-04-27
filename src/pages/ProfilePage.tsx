@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { User, Mail, Phone, MapPin, Shield, Save, Loader2, Globe, Bell, Moon, Sun } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { userService } from '../services/api';
 import GlassCard from '../components/ui/GlassCard';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
+
+// Modules
+import { userRepository } from '../modules/users/infrastructure/user.repository';
 
 const ProfilePage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -47,8 +49,7 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await userService.getMe();
-        const data = response.data;
+        const data = await userRepository.getMe();
         setProfile(data);
         setFormData({
           fullName: data.fullName || '',
@@ -108,7 +109,7 @@ const ProfilePage: React.FC = () => {
         updateData.driverProfile = formData.driverProfile;
       }
 
-      await userService.updateProfile(updateData);
+      await userRepository.updateProfile(updateData);
       setMessage({ type: 'success', text: t('profile.updated_success') || 'Profile updated successfully!' });
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -124,6 +125,10 @@ const ProfilePage: React.FC = () => {
         <Loader2 className="animate-spin text-primary-500" size={48} />
       </div>
     );
+  }
+
+  if (!profile) {
+     return <div className="text-center py-20 text-slate-500">{t('common.no_data')}</div>;
   }
 
   return (

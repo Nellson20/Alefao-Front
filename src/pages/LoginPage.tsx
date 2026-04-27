@@ -1,58 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { LogIn, Mail, Lock, Truck, Store, Shield } from 'lucide-react';
-import Cookies from 'js-cookie';
 import { useTranslation } from 'react-i18next';
-import { authService } from '../services/api';
 import Button from '../components/ui/Button';
 
-import { useAuth } from '../contexts/AuthContext';
+// Modules
+import { useLogin } from '../modules/auth/application/useLogin';
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState<'admin' | 'vendor' | 'driver'>('admin');
-  const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   
-  const { login } = useAuth();
+  const { login, isLoading, error, fieldErrors } = useLogin();
   const navigate = useNavigate();
   const location = useLocation();
   const successMessage = location.state?.message;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-    setFieldErrors({});
-    
-    try {
-      const response = await authService.login({ email, password });
-      const { accessToken, refreshToken } = response.data;
-      
-      login(accessToken, refreshToken);
-      const actualRole = Cookies.get('role') || role;
-      
-      navigate(`/${actualRole}`);
-    } catch (err: any) {
-      console.error('API Login failed:', err);
-      const errorData = err.response?.data?.message;
-      
-      if (Array.isArray(errorData)) {
-        const newErrors: Record<string, string> = {};
-        errorData.forEach((msg: string) => {
-          const lowerMsg = msg.toLowerCase();
-          if (lowerMsg.includes('email')) newErrors.email = msg;
-          else if (lowerMsg.includes('password') || lowerMsg.includes('mot de passe')) newErrors.password = msg;
-        });
-        setFieldErrors(newErrors);
-        setError(t('auth.fix_errors'));
-      } else {
-        setError(errorData || t('auth.invalid_credentials'));
-      }
-      setIsLoading(false);
+    const result = await login({ email, password }, role);
+    if (result.success) {
+      navigate(`/${result.role}`);
     }
   };
 

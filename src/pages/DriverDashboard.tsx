@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 import GlassCard from '../components/ui/GlassCard';
 import Button from '../components/ui/Button';
 import StatCard from '../components/ui/StatCard';
-import { orderService } from '../services/api';
+
+// Modules
+import { orderRepository } from '../modules/orders/infrastructure/order.repository';
 
 const DriverDashboard: React.FC = () => {
   const { t } = useTranslation();
@@ -14,8 +16,8 @@ const DriverDashboard: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await orderService.getDriverOrders();
-        setOrders(response.data.data || response.data);
+        const data = await orderRepository.getDriverOrders();
+        setOrders(data);
       } catch (error) {
         console.error('Failed to fetch driver orders:', error);
       } finally {
@@ -28,7 +30,7 @@ const DriverDashboard: React.FC = () => {
 
   const activeOrder = orders.find(o => ['ACCEPTED', 'PICKED_UP'].includes(o.status));
   const completedOrders = orders.filter(o => o.status === 'DELIVERED');
-  const todayEarnings = completedOrders.reduce((acc, o) => acc + (o.deliveryFee || 10), 0); // Assuming fallback fee
+  const todayEarnings = completedOrders.reduce((acc, o) => acc + (Number(o.deliveryFee) || 10), 0);
 
   if (isLoading) {
     return (
@@ -75,7 +77,7 @@ const DriverDashboard: React.FC = () => {
                 <Button icon={Navigation} className="flex-1 py-3 md:py-4">
                   {t('dashboard.welcome.driver_nav') || 'Open Navigation'}
                 </Button>
-                <Button variant="secondary" className="flex-1 py-3 md:py-4">
+                <Button variant="secondary" className="flex-1 py-3 md:py-4" onClick={() => window.location.href='/orders'}>
                   {activeOrder.status === 'ACCEPTED' ? t('orders.pickup_confirm') : t('orders.deliver_confirm')}
                 </Button>
               </div>
@@ -121,11 +123,11 @@ const DriverDashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="font-semibold text-sm">{t('common.orders')} #{order.id.substring(0, 8)}</p>
-                  <p className="text-xs text-slate-500">{new Date(order.updatedAt).toLocaleString()}</p>
+                  <p className="text-xs text-slate-500">{new Date(order.updatedAt || order.createdAt).toLocaleString()}</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="font-bold text-emerald-400">+${(order.deliveryFee || 10).toFixed(2)}</p>
+                <p className="font-bold text-emerald-400">+${(Number(order.deliveryFee) || 10).toFixed(2)}</p>
                 <p className="text-xs text-slate-500">{t('orders.status.delivered')}</p>
               </div>
             </div>
