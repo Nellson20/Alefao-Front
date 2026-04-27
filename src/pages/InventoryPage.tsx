@@ -106,7 +106,7 @@ const InventoryPage: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-1">
                     <h3 className="font-bold text-lg truncate">{product.name}</h3>
-                    <Badge variant={product.status === 'IN_STOCK' ? 'success' : product.status === 'LOW_STOCK' ? 'warning' : 'danger'}>
+                    <Badge variant={product.status === 'IN_STOCK' ? 'success' : product.status === 'LOW_STOCK' ? 'warning' : 'error'}>
                       {t(`inventory.status.${product.status.toLowerCase()}`, { defaultValue: product.status.replace('_', ' ') })}
                     </Badge>
                   </div>

@@ -231,5 +231,13 @@
     "shop_address": "Adresse de la boutique",
     "vehicle_info": "Informations du Véhicule",
     "vehicle_type": "Type de véhicule"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "mark_all_read": "Tout marquer comme lu",
+    "empty": "Aucune notification pour le moment",
+    "view_all": "Voir tout l'historique",
+    "new_order_title": "Nouvelle Commande",
+    "new_order_message": "Une nouvelle commande a été créée : #{{id}}"
   }
 }

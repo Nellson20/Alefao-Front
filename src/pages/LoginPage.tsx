@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { LogIn, Mail, Lock, Truck, Store, Shield } from 'lucide-react';
+import { Mail, Lock, Truck, Store, Shield } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Button from '../components/ui/Button';
 

@@ -231,5 +231,13 @@
     "shop_address": "Shop Address",
     "vehicle_info": "Vehicle Information",
     "vehicle_type": "Vehicle Type"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "mark_all_read": "Mark all as read",
+    "empty": "No notifications yet",
+    "view_all": "View all history",
+    "new_order_title": "New Order",
+    "new_order_message": "A new order has been created: #{{id}}"
   }
 }

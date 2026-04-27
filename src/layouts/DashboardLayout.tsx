@@ -16,6 +16,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 
+import NotificationBell from '../modules/notifications/ui/NotificationBell';
+
 interface DashboardLayoutProps {
   children: React.ReactNode;
   role: 'admin' | 'vendor' | 'driver';
@@ -51,7 +53,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, role }) => 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   return (
-    <div className="flex min-h-screen bg-background overflow-x-hidden">
+    <div className="flex min-h-screen bg-background">
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div 
@@ -133,9 +135,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, role }) => 
             </div>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
-            <button className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all">
-              <Bell size={20} className="text-slate-400" />
-            </button>
+            <NotificationBell />
             <div className="h-8 w-[1px] bg-white/10 mx-1 md:mx-2" />
             <button className="btn-primary py-2 md:py-2.5 px-3 md:px-5 text-xs md:text-sm whitespace-nowrap">
               {t('common.quick_action')}
@@ -143,9 +143,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, role }) => 
           </div>
         </header>
 
-        <div className="animate-fade-in">
-          {children}
-        </div>
+        {children}
       </main>
     </div>
   );

@@ -74,7 +74,7 @@ const OrdersPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8 h-full">
+    <div className="space-y-8 pb-20">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -99,7 +99,7 @@ const OrdersPage: React.FC = () => {
       </div>
 
       {/* Main Content Layout */}
-      <div className="flex flex-col lg:flex-row gap-8 items-start h-full">
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* Left Side: Order List */}
         <div className={`flex-1 w-full transition-all duration-300 ${selectedOrder ? 'lg:w-2/3' : 'w-full'}`}>
           <OrderList 
@@ -107,7 +107,7 @@ const OrdersPage: React.FC = () => {
             userRole={user?.role}
             selectedOrderId={selectedOrder?.id}
             onSelect={handleSelectOrder}
-            onEdit={handleSelectOrder} // Click edit button also selects
+            onEdit={handleSelectOrder}
             onDelete={handleOpenDeleteModal}
             onViewDetails={handleSelectOrder}
           />
@@ -115,39 +115,43 @@ const OrdersPage: React.FC = () => {
 
         {/* Right Side: Edit Panel (Sticky) */}
         {selectedOrder && (
-          <div className="w-full lg:w-1/3 lg:sticky lg:top-8 animate-in fade-in slide-in-from-right-8 duration-300">
-            <GlassCard className="p-6 border-primary-500/20 ring-1 ring-primary-500/10 h-[calc(100vh-20px)]">
-              <div className="flex border-red-300 items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
+          <aside className="w-full lg:w-[40%] sticky top-6 p-0 z-10 hidden lg:block">
+            <GlassCard className="border-primary-500/20 ring-1 ring-primary-500/10 flex flex-col shadow-2xl shadow-black/50 overflow-hidden">
+              <div className="border-b pb-6 border-white/5 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-primary-500/20 text-primary-400 flex items-center justify-center">
                     <Info size={18} />
                   </div>
-                  <h2 className="font-bold text-lg">{t('orders.edit_order')} #{selectedOrder.id.substring(0, 8)}</h2>
+                  <div>
+                    <h2 className="font-bold text-base">{t('orders.edit_order')}</h2>
+                    <p className="text-[10px] text-slate-500 font-mono">#{selectedOrder.id.substring(0, 8)}</p>
+                  </div>
                 </div>
                 <button 
                   onClick={() => setSelectedOrder(null)}
-                  className="p-2 hover:bg-white/5 rounded-full transition-colors text-slate-400 hover:text-white"
+                  className="p-2 hover:bg-white/10 rounded-full transition-colors text-slate-400 hover:text-white"
                 >
                   <X size={20} />
                 </button>
               </div>
-              <div className="max-h-[calc(100vh-120px)] overflow-y-auto pr-2">
-              <OrderForm 
-                initialData={selectedOrder}
-                onSubmit={handleUpdateSubmit}
-                isSubmitting={isSubmitting}
-                buttonLabel={t('orders.update_order') || 'Update Order'}
-                showCancel={true}
-                onCancel={() => setSelectedOrder(null)}
-                isMultiStep={false} // Side panel uses single page form
-              />
+              
+              <div className="pt-6 overflow-y-auto max-h-[calc(100vh-160px)] custom-scrollbar">
+                <OrderForm 
+                  initialData={selectedOrder}
+                  onSubmit={handleUpdateSubmit}
+                  isSubmitting={isSubmitting}
+                  buttonLabel={t('orders.update_order') || 'Update Order'}
+                  showCancel={true}
+                  onCancel={() => setSelectedOrder(null)}
+                  isMultiStep={false}
+                />
               </div>
             </GlassCard>
-          </div>
+          </aside>
         )}
       </div>
 
-      {/* Modals */}
+      {/* Modals (for mobile and deletion) */}
       <DeleteOrderModal 
         order={orderToDelete}
         isOpen={isDeleteModalOpen}

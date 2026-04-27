@@ -253,7 +253,7 @@ const OrderForm: React.FC<OrderFormProps> = ({
           </div>
         )}
 
-        <div className="flex gap-4 pt-4">
+        <div className="flex gap-4 pt-4 sticky bottom-0">
           {isMultiStep && step > 1 && (
             <Button type="button" variant="secondary" className="flex-1" onClick={() => setStep(step - 1)}>
               {t('common.back')}
