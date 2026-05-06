@@ -139,4 +139,9 @@
   html:not(.dark) .bg-red-500 {
     color: #ffffff !important;
   }
+
+  /* Dark Mode Map Styles */
+  .dark .leaflet-container {
+    background: #052246 !important;
+  }
 }

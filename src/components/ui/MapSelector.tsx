@@ -4,6 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapPin, X, Check, Search } from 'lucide-react';
 import Button from './Button';
+import { useMapTheme } from '../../hooks/useMapTheme';
 
 // Fix for default marker icon in Leaflet + React/Vite
 // @ts-ignore
@@ -61,6 +62,7 @@ const MapSelector: React.FC<MapSelectorProps> = ({
   const [position, setPosition] = useState<L.LatLng | null>(
     initialLat && initialLng ? L.latLng(initialLat, initialLng) : null
   );
+  const { isDarkMode, tileLayerUrl, attribution } = useMapTheme();
 
   useEffect(() => {
     if (isOpen && initialLat && initialLng) {
@@ -162,10 +164,11 @@ const MapSelector: React.FC<MapSelectorProps> = ({
             zoom={13} 
             style={{ height: '100%', width: '100%' }}
             zoomControl={false}
+            className={isDarkMode ? 'leaflet-map-bluish' : ''}
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution={attribution}
+              url={tileLayerUrl}
             />
             <LocationMarker position={position} setPosition={setPosition} />
             {position && <ChangeView center={position} />}

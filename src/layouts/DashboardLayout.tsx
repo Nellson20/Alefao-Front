@@ -2,6 +2,7 @@ import React from 'react';
 import { 
   LayoutDashboard, 
   Package, 
+  ClipboardList,
   Truck, 
   Users, 
   Settings, 
@@ -34,16 +35,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, role }) => 
       { icon: Package, label: t('common.orders'), path: '/admin/orders' },
       { icon: Users, label: t('common.vendors'), path: '/admin/vendors' },
       { icon: Truck, label: t('common.drivers'), path: '/admin/drivers' },
+      { icon: Bell, label: t('common.notifications'), path: '/admin/notifications' },
       { icon: Settings, label: t('common.system'), path: '/admin/settings' },
     ],
     vendor: [
       { icon: LayoutDashboard, label: t('common.shop_dashboard'), path: '/vendor' },
+      { icon: ClipboardList, label: t('common.orders'), path: '/vendor/orders' },
       { icon: Package, label: t('common.inventory'), path: '/vendor/inventory' },
-      { icon: Bell, label: t('common.new_orders'), path: '/vendor/orders' },
+      { icon: Bell, label: t('common.notifications'), path: '/vendor/notifications' },
       { icon: Settings, label: t('common.profile'), path: '/vendor/profile' },
     ],
     driver: [
-      { icon: Truck, label: t('common.deliveries'), path: '/driver' },
+      { icon: Truck, label: t('common.deliveries'), path: '/driver/deliveries' },
       { icon: Package, label: t('common.available_jobs'), path: '/driver/jobs' },
       { icon: Bell, label: t('common.notifications'), path: '/driver/notifications' },
       { icon: Settings, label: t('common.preferences'), path: '/driver/settings' },

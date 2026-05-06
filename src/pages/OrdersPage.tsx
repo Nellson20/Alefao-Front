@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Plus, Loader2, X, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
@@ -18,6 +18,7 @@ const OrdersPage: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   
   // Custom Hooks
@@ -28,6 +29,27 @@ const OrdersPage: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+
+  const orderIdFromUrl = searchParams.get('id');
+
+  // Sync selection from URL on load
+  useEffect(() => {
+    if (orderIdFromUrl && orders.length > 0 && !selectedOrder) {
+      const order = orders.find(o => o.id === orderIdFromUrl);
+      if (order) {
+        setSelectedOrder(order);
+      }
+    }
+  }, [orderIdFromUrl, orders]);
+
+  // Sync URL from selection
+  useEffect(() => {
+    if (selectedOrder) {
+      setSearchParams({ id: selectedOrder.id }, { replace: true });
+    } else if (!isLoading && orderIdFromUrl) {
+      setSearchParams({}, { replace: true });
+    }
+  }, [selectedOrder, isLoading, orderIdFromUrl, setSearchParams]);
 
   const handleNavigateToCreate = () => {
     const basePath = user?.role === 'admin' ? '/admin/orders' : '/vendor/orders';

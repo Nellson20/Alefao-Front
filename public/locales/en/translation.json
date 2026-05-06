@@ -47,7 +47,10 @@
     "admin": "Admin",
     "vendor": "Vendor",
     "driver": "Driver",
-    "join": "Join"
+    "join": "Join",
+    "my_deliveries": "My Deliveries",
+    "all": "All",
+    "new": "New"
   },
   "auth": {
     "login": "Login",
@@ -114,11 +117,22 @@
     "status": {
       "pending": "Pending",
       "accepted": "Accepted",
+      "assigned": "Assigned",
+      "active": "Active",
       "picked_up": "Picked Up",
+      "in_delivery": "In Delivery",
       "delivered": "Delivered",
       "cancelled": "Cancelled"
     },
+    "status_title": "Order Status",
+    "pickup_action": "Pickup Validation",
+    "delivery_action": "Delivery Validation",
+    "enter_pickup_code": "Enter pickup code",
+    "enter_delivery_code": "Enter delivery code",
+    "confirm_pickup": "Confirm Pickup",
+    "confirm_delivery": "Confirm Delivery",
     "subtitle": "Track and manage all deliveries in the system",
+    "manage_deliveries": "Manage and track your delivery history",
     "details": "Details",
     "empty_title": "No Orders Found",
     "empty_subtitle": "We couldn't find any orders matching your current filters or search terms.",
@@ -234,8 +248,12 @@
   },
   "notifications": {
     "title": "Notifications",
+    "subtitle": "Stay updated with your latest activities",
     "mark_all_read": "Mark all as read",
+    "unread": "Unread",
+    "read": "Read",
     "empty": "No notifications yet",
+    "empty_subtitle": "We couldn't find any notifications matching this filter.",
     "view_all": "View all history",
     "new_order_title": "New Order",
     "new_order_message": "A new order has been created: #{{id}}"

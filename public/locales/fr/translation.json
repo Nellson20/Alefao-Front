@@ -47,7 +47,10 @@
     "admin": "Admin",
     "vendor": "Vendeur",
     "driver": "Livreur",
-    "join": "Rejoindre"
+    "join": "Rejoindre",
+    "my_deliveries": "Mes Livraisons",
+    "all": "Tous",
+    "new": "Nouveau"
   },
   "auth": {
     "login": "Connexion",
@@ -114,11 +117,22 @@
     "status": {
       "pending": "En attente",
       "accepted": "Accepté",
+      "assigned": "Assigné",
+      "active": "En cours",
       "picked_up": "Ramassé",
+      "in_delivery": "En livraison",
       "delivered": "Livré",
       "cancelled": "Annulé"
     },
+    "status_title": "Statut de la commande",
+    "pickup_action": "Validation du Ramassage",
+    "delivery_action": "Validation de la Livraison",
+    "enter_pickup_code": "Entrez le code de ramassage",
+    "enter_delivery_code": "Entrez le code de livraison",
+    "confirm_pickup": "Confirmer le Ramassage",
+    "confirm_delivery": "Confirmer la Livraison",
     "subtitle": "Suivez et gérez toutes les livraisons du système",
+    "manage_deliveries": "Gérez et suivez l'historique de vos livraisons",
     "details": "Détails",
     "empty_title": "Aucune Commande Trouvée",
     "empty_subtitle": "Nous n'avons trouvé aucune commande correspondant à vos filtres ou termes de recherche.",
@@ -234,8 +248,12 @@
   },
   "notifications": {
     "title": "Notifications",
+    "subtitle": "Restez informé de vos dernières activités",
     "mark_all_read": "Tout marquer comme lu",
+    "unread": "Non lues",
+    "read": "Lues",
     "empty": "Aucune notification pour le moment",
+    "empty_subtitle": "Nous n'avons trouvé aucune notification pour ce filtre.",
     "view_all": "Voir tout l'historique",
     "new_order_title": "Nouvelle Commande",
     "new_order_message": "Une nouvelle commande a été créée : #{{id}}"

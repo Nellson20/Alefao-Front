@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Package, MapPin, Clock, ChevronRight, Loader2, Navigation, X, Truck, CheckCircle } from 'lucide-react';
+import { Package, MapPin, Clock, ChevronRight, Loader2, Navigation, X, Truck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import GlassCard from '../components/ui/GlassCard';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
+import { useMapTheme } from '../hooks/useMapTheme';
 import { driverService } from '../services/api';
+import { orderRepository } from '../modules/orders/infrastructure/order.repository';
 
 // Fix Leaflet default icon
 // @ts-ignore
@@ -46,23 +48,65 @@ const FlyToLocation = ({ lat, lng }: { lat: number; lng: number }) => {
 
 const AvailableJobsPage: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [jobs, setJobs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [isAccepting, setIsAccepting] = useState<string | null>(null);
+  const { isDarkMode, tileLayerUrl, attribution } = useMapTheme();
+
+  const jobIdFromUrl = searchParams.get('id');
+
+  // Update URL when selectedJob changes
+  useEffect(() => {
+    if (selectedJob) {
+      setSearchParams({ id: selectedJob.id }, { replace: true });
+    } else if (!isLoading && jobIdFromUrl) {
+      // Clear URL only if we finished loading and no job is selected 
+      // (means it was either closed or not found)
+      setSearchParams({}, { replace: true });
+    }
+  }, [selectedJob, isLoading, jobIdFromUrl, setSearchParams]);
+
+  const fetchJobs = async () => {
+    setIsLoading(true);
+    try {
+      const response = await driverService.getAvailableJobs();
+      setJobs(response.data.data || response.data);
+    } catch (error) {
+      console.error('Failed to fetch available jobs:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const response = await driverService.getAvailableJobs();
-        setJobs(response.data.data || response.data);
-      } catch (error) {
-        console.error('Failed to fetch available jobs:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchJobs();
   }, []);
+
+  useEffect(() => {
+    if (jobIdFromUrl && jobs.length > 0) {
+      const job = jobs.find(j => j.id === jobIdFromUrl);
+      if (job) {
+        setSelectedJob(job);
+      }
+    }
+  }, [jobIdFromUrl, jobs]);
+
+  const handleAccept = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setIsAccepting(id);
+    try {
+      await orderRepository.accept(id);
+      navigate('/driver/deliveries');
+    } catch (error) {
+      console.error('Failed to accept job:', error);
+      alert('Une erreur est survenue lors de l\'acceptation de la commande.');
+    } finally {
+      setIsAccepting(null);
+    }
+  };
 
   const jobsWithCoords = jobs.filter(j => j.pickupLat && j.pickupLng);
   const mapCenter: [number, number] = selectedJob?.pickupLat && selectedJob?.pickupLng
@@ -78,7 +122,7 @@ const AvailableJobsPage: React.FC = () => {
       <div className="flex flex-col gap-4 flex-1 min-w-0 pb-8">
         <div>
           <h1 className="text-3xl font-bold">{t('common.available_jobs')}</h1>
-          <p className="text-slate-500">{t('dashboard.welcome.driver')}</p>
+          <p className="text-slate-500">{t('dashboard.welcome.driver', { count: jobs.length })}</p>
         </div>
 
         {isLoading ? (
@@ -140,8 +184,13 @@ const AvailableJobsPage: React.FC = () => {
                   >
                     {selectedJob?.id === job.id ? 'Fermer' : t('common.view')}
                   </Button>
-                  <Button className="flex-1" icon={ChevronRight}>
-                    {t('orders.accept')}
+                  <Button 
+                    className="flex-1" 
+                    icon={isAccepting === job.id ? Loader2 : ChevronRight}
+                    onClick={(e) => handleAccept(e, job.id)}
+                    disabled={isAccepting !== null}
+                  >
+                    {isAccepting === job.id ? '...' : t('orders.accept')}
                   </Button>
                 </div>
               </div>
@@ -166,10 +215,16 @@ const AvailableJobsPage: React.FC = () => {
         {/* Map Header */}
         {/* Map */}
         <div className="flex-1">
-          <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }} zoomControl>
+          <MapContainer 
+            center={mapCenter} 
+            zoom={13} 
+            style={{ height: '100%', width: '100%' }} 
+            zoomControl
+            className={isDarkMode ? 'leaflet-map-bluish' : ''}
+          >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution={attribution}
+              url={tileLayerUrl}
             />
             {selectedJob?.pickupLat && selectedJob?.pickupLng && (
               <FlyToLocation lat={Number(selectedJob.pickupLat)} lng={Number(selectedJob.pickupLng)} />
@@ -205,7 +260,13 @@ const AvailableJobsPage: React.FC = () => {
                   <p className="text-xs text-slate-500 truncate">→ {selectedJob.deliveryAddress}</p>
                 </div>
               </div>
-              <Button icon={ChevronRight}>{t('orders.accept')}</Button>
+              <Button 
+                icon={isAccepting === selectedJob.id ? Loader2 : ChevronRight}
+                onClick={(e) => handleAccept(e, selectedJob.id)}
+                disabled={isAccepting !== null}
+              >
+                {isAccepting === selectedJob.id ? '...' : t('orders.accept')}
+              </Button>
             </div>
           </div>
         )}

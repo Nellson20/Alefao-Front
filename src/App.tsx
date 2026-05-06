@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -10,6 +11,8 @@ import VendorsPage from './pages/VendorsPage';
 import DriversPage from './pages/DriversPage';
 import InventoryPage from './pages/InventoryPage';
 import AvailableJobsPage from './pages/AvailableJobsPage';
+import DriverOrdersPage from './pages/DriverOrdersPage';
+import NotificationsPage from './pages/NotificationsPage';
 import ProfilePage from './pages/ProfilePage';
 import CreateOrderPage from './pages/CreateOrderPage';
 import { AuthProvider } from './contexts/AuthContext';
@@ -17,6 +20,17 @@ import ProtectedRoute from './components/ProtectedRoute';
 import './index.css';
 
 function App() {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else if (savedTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <Router>
@@ -60,6 +74,13 @@ function App() {
               </DashboardLayout>
             </ProtectedRoute>
           } />
+          <Route path="/admin/notifications" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <DashboardLayout role="admin">
+                <NotificationsPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
           <Route path="/admin/settings" element={
             <ProtectedRoute allowedRoles={['admin']}>
               <DashboardLayout role="admin">
@@ -97,6 +118,13 @@ function App() {
               </DashboardLayout>
             </ProtectedRoute>
           } />
+          <Route path="/vendor/notifications" element={
+            <ProtectedRoute allowedRoles={['vendor']}>
+              <DashboardLayout role="vendor">
+                <NotificationsPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
           <Route path="/vendor/profile" element={
             <ProtectedRoute allowedRoles={['vendor']}>
               <DashboardLayout role="vendor">
@@ -117,6 +145,20 @@ function App() {
             <ProtectedRoute allowedRoles={['driver']}>
               <DashboardLayout role="driver">
                 <AvailableJobsPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/driver/deliveries" element={
+            <ProtectedRoute allowedRoles={['driver']}>
+              <DashboardLayout role="driver">
+                <DriverOrdersPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/driver/notifications" element={
+            <ProtectedRoute allowedRoles={['driver']}>
+              <DashboardLayout role="driver">
+                <NotificationsPage />
               </DashboardLayout>
             </ProtectedRoute>
           } />

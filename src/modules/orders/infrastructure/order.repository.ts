@@ -23,12 +23,56 @@ export class ApiOrderRepository implements OrderRepository {
   }
 
   async create(order: Partial<Order>): Promise<Order> {
-    const response = await apiClient.post('/orders', order);
+    const formData = new FormData();
+    
+    Object.entries(order).forEach(([key, value]) => {
+      if (key === 'attachments' && Array.isArray(value)) {
+        const existingUrls: string[] = [];
+        value.forEach(item => {
+          if (item instanceof File) {
+            formData.append('attachments', item);
+          } else if (typeof item === 'string') {
+            existingUrls.push(item);
+          }
+        });
+        if (existingUrls.length > 0) {
+          formData.append('attachments', JSON.stringify(existingUrls));
+        }
+      } else if (value !== undefined && value !== null) {
+        formData.append(key, value.toString());
+      }
+    });
+
+    const response = await apiClient.post('/orders', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
     return response.data;
   }
 
   async update(id: string, order: Partial<Order>): Promise<Order> {
-    const response = await apiClient.patch(`/orders/${id}`, order);
+    const formData = new FormData();
+    
+    Object.entries(order).forEach(([key, value]) => {
+      if (key === 'attachments' && Array.isArray(value)) {
+        const existingUrls: string[] = [];
+        value.forEach(item => {
+          if (item instanceof File) {
+            formData.append('attachments', item);
+          } else if (typeof item === 'string') {
+            existingUrls.push(item);
+          }
+        });
+        if (existingUrls.length > 0) {
+          formData.append('attachments', JSON.stringify(existingUrls));
+        }
+      } else if (value !== undefined && value !== null) {
+        formData.append(key, value.toString());
+      }
+    });
+
+    const response = await apiClient.patch(`/orders/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
     return response.data;
   }
 

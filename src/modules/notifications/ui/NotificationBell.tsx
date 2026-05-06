@@ -1,11 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, CheckCheck, Trash2, Clock, Package } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../application/useNotifications';
+import { useAuth } from '../../../contexts/AuthContext';
 import GlassCard from '../../../components/ui/GlassCard';
 
 const NotificationBell: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead, isLoading } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -23,6 +27,27 @@ const NotificationBell: React.FC = () => {
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const handleNotificationClick = (notif: any) => {
+    if (!notif.isRead) markAsRead(notif.id);
+    setIsOpen(false);
+    
+    if (notif.type === 'ORDER_CREATED' && notif.metadata?.orderId && user?.role === 'driver') {
+      navigate(`/driver/jobs?id=${notif.metadata.orderId}`);
+    } else if (notif.metadata?.orderId) {
+      // General redirection for orders if ID is present
+      const base = user?.role === 'admin' ? '/admin/orders' : 
+                   user?.role === 'vendor' ? '/vendor/orders' : '/driver/deliveries';
+      navigate(`${base}?id=${notif.metadata.orderId}`);
+    }
+  };
+
+  const handleViewAll = () => {
+    setIsOpen(false);
+    const path = user?.role === 'admin' ? '/admin/notifications' : 
+                 user?.role === 'vendor' ? '/vendor/notifications' : '/driver/notifications';
+    navigate(path);
   };
 
   return (
@@ -69,7 +94,7 @@ const NotificationBell: React.FC = () => {
                 {notifications.map((notif) => (
                   <div 
                     key={notif.id}
-                    onClick={() => !notif.isRead && markAsRead(notif.id)}
+                    onClick={() => handleNotificationClick(notif)}
                     className={`p-4 hover:bg-white/5 transition-colors cursor-pointer relative group ${
                       !notif.isRead ? 'bg-primary-500/5' : ''
                     }`}
@@ -105,7 +130,10 @@ const NotificationBell: React.FC = () => {
           </div>
 
           <div className="p-3 border-t border-white/5 bg-white/2 text-center">
-            <button className="text-xs text-slate-500 hover:text-slate-300 transition-colors uppercase tracking-widest font-bold">
+            <button 
+              onClick={handleViewAll}
+              className="text-xs text-slate-500 hover:text-slate-300 transition-colors uppercase tracking-widest font-bold w-full py-1"
+            >
               {t('notifications.view_all') || 'View all history'}
             </button>
           </div>

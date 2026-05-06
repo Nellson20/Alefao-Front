@@ -1,4 +1,4 @@
-export type OrderStatus = 'CREATED' | 'PENDING' | 'ACCEPTED' | 'ASSIGNED' | 'PICKED_UP' | 'DELIVERED' | 'CANCELLED';
+export type OrderStatus = 'CREATED' | 'PENDING' | 'ACCEPTED' | 'ASSIGNED' | 'PICKED_UP' | 'IN_DELIVERY' | 'DELIVERED' | 'CANCELLED';
 
 export interface OrderAttachment {
   type: 'image' | 'document';
@@ -32,7 +32,7 @@ export interface Order {
   vendor?: {
     shopName: string;
   };
-  attachments?: OrderAttachment[];
+  attachments?: (string | File)[];
 }
 
 export interface OrderRepository {

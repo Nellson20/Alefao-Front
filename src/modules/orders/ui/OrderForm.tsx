@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { User, MapPin, Package, Save, Loader2 } from 'lucide-react';
+import { User, MapPin, Package, Save, Loader2, FileText, Paperclip, Upload, X } from 'lucide-react';
+import PdfPreview from './PdfPreview';
 import { useTranslation } from 'react-i18next';
 import Button from '../../../components/ui/Button';
 import MapSelector from '../../../components/ui/MapSelector';
@@ -51,11 +52,44 @@ const OrderForm: React.FC<OrderFormProps> = ({
     field: 'pickup'
   });
 
+  const [filePreviews, setFilePreviews] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (initialData?.attachments && Array.isArray(initialData.attachments)) {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      setFilePreviews(initialData.attachments.map((a: any) => {
+        if (!a) return null;
+        const isFile = a instanceof Blob || a instanceof File;
+        
+        let url = '';
+        if (isFile) {
+          url = URL.createObjectURL(a);
+        } else if (typeof a === 'string') {
+          url = a.startsWith('http') || a.startsWith('blob:') ? a : `${baseUrl}${a}`;
+        }
+
+        return {
+          url,
+          name: typeof a === 'string' ? a.split('/').pop() : a.name,
+          type: typeof a === 'string' 
+            ? (a.match(/\.(jpg|jpeg|png|gif)$/i) ? 'image' : 'file') 
+            : (a.type?.startsWith('image/') ? 'image' : 'file'),
+          file: isFile ? a : undefined
+        };
+      }).filter(Boolean));
+    }
+  }, [initialData]);
+
   useEffect(() => {
     if (initialData) {
+      const cleanAttachments = Array.isArray(initialData.attachments) 
+        ? initialData.attachments.filter((a: any) => typeof a === 'string' || a instanceof File)
+        : [];
+        
       setFormData({
         ...formData,
         ...initialData,
+        attachments: cleanAttachments,
         price: initialData.price?.toString() || '',
         requestedAt: initialData.requestedAt ? new Date(initialData.requestedAt).toISOString().split('T')[0] : formData.requestedAt,
       });
@@ -64,25 +98,53 @@ const OrderForm: React.FC<OrderFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isMultiStep && step < 3) {
+    if (isMultiStep && step < 4) {
       setStep(step + 1);
       return;
     }
     onSubmit(formData);
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const newAttachments = [...formData.attachments, ...files];
+    setFormData({ ...formData, attachments: newAttachments });
+
+    const newPreviews = files.map(f => ({
+      url: URL.createObjectURL(f),
+      name: f.name,
+      type: f.type.startsWith('image/') ? 'image' : 'file',
+      file: f, // keep the original File object for PDF canvas rendering
+    }));
+    setFilePreviews([...filePreviews, ...newPreviews]);
+  };
+
+  const removeFile = (index: number) => {
+    const newAttachments = [...formData.attachments];
+    newAttachments.splice(index, 1);
+    
+    const newPreviews = [...filePreviews];
+    const removed = newPreviews.splice(index, 1)[0];
+    if (removed.url.startsWith('blob:')) {
+      URL.revokeObjectURL(removed.url);
+    }
+
+    setFormData({ ...formData, attachments: newAttachments });
+    setFilePreviews(newPreviews);
+  };
+
   const renderStepIndicator = () => {
     if (!isMultiStep) return null;
     return (
       <div className="flex items-center justify-center gap-4 mb-8">
-        {[1, 2, 3].map((s) => (
+        {[1, 2, 3, 4].map((s) => (
           <div key={s} className="flex items-center gap-2">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold transition-all ${
               step === s ? 'bg-primary-500 text-white' : step > s ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-500'
             }`}>
               {s}
             </div>
-            {s < 3 && <div className={`w-8 h-0.5 ${step > s ? 'bg-emerald-500' : 'bg-white/10'}`} />}
+            {s < 4 && <div className={`w-8 h-0.5 ${step > s ? 'bg-emerald-500' : 'bg-white/10'}`} />}
           </div>
         ))}
       </div>
@@ -253,6 +315,68 @@ const OrderForm: React.FC<OrderFormProps> = ({
           </div>
         )}
 
+        {(!isMultiStep || step === 4) && (
+          <div className="space-y-6 border-t border-white/5 pt-6 animate-in fade-in slide-in-from-right-4 duration-300">
+            <h3 className="text-sm font-black text-violet-400 uppercase tracking-widest flex items-center gap-2">
+              <Paperclip size={16} /> {t('orders.attachments')}
+            </h3>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-center w-full">
+                <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-white/10 rounded-3xl cursor-pointer hover:bg-white/5 hover:border-primary-500/50 transition-all group">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <div className="p-4 rounded-2xl bg-primary-500/10 text-primary-400 mb-3 group-hover:scale-110 transition-transform">
+                      <Upload size={24} />
+                    </div>
+                    <p className="mb-2 text-sm text-slate-300 font-bold">Cliquez pour télécharger</p>
+                    <p className="text-xs text-slate-500 uppercase tracking-wider">PNG, JPG, PDF (max 5MB)</p>
+                  </div>
+                  <input type="file" multiple className="hidden" onChange={handleFileChange} accept="image/*,application/pdf" />
+                </label>
+              </div>
+
+              {filePreviews.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {filePreviews.map((preview, idx) => (
+                    <div key={idx} className="relative group rounded-2xl overflow-hidden border border-white/10 aspect-square bg-white/5">
+                      <a 
+                        href={preview.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block w-full h-full cursor-zoom-in"
+                      >
+                        {preview.type === 'image' ? (
+                          <img src={preview.url} alt={preview.name} className="w-full h-full object-cover" />
+                        ) : (
+                          preview.name?.toLowerCase().endsWith('.pdf') ? (
+                            <PdfPreview url={preview.url} file={preview.file} className="w-full h-full" />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center p-4">
+                              <FileText size={32} className="text-primary-400 mb-2" />
+                              <p className="text-[10px] text-slate-400 truncate w-full text-center px-2">{preview.name}</p>
+                            </div>
+                          )
+                        )}
+                      </a>
+                      <button 
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          removeFile(idx);
+                        }}
+                        className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-4 pt-4 sticky bottom-0">
           {isMultiStep && step > 1 && (
             <Button type="button" variant="secondary" className="flex-1" onClick={() => setStep(step - 1)}>
@@ -264,8 +388,8 @@ const OrderForm: React.FC<OrderFormProps> = ({
               {t('common.cancel')}
             </Button>
           )}
-          <Button type="submit" className="flex-1" icon={isSubmitting ? Loader2 : (isMultiStep && step < 3 ? undefined : Save)} disabled={isSubmitting}>
-            {isSubmitting ? t('common.saving') : (isMultiStep && step < 3 ? t('common.next') : (buttonLabel || t('common.save')))}
+          <Button type="submit" className="flex-1" icon={isSubmitting ? Loader2 : (isMultiStep && step < 4 ? undefined : Save)} disabled={isSubmitting}>
+            {isSubmitting ? t('common.saving') : (isMultiStep && step < 4 ? t('common.next') : (buttonLabel || t('common.save')))}
           </Button>
         </div>
       </form>

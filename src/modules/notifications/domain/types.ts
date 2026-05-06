@@ -3,11 +3,12 @@ export interface Notification {
   userId: string;
   title: string;
   message: string;
-  type: 'ORDER_CREATED' | 'ORDER_STATUS_CHANGED' | 'SYSTEM';
+  type: 'ORDER_CREATED' | 'ORDER_ACCEPTED' | 'ORDER_CANCELLED' | 'ORDER_STATUS_CHANGED' | 'SYSTEM' | 'ALERT';
   isRead: boolean;
   createdAt: string;
   metadata?: {
     orderId?: string;
+    [key: string]: any;
   };
 }
 
