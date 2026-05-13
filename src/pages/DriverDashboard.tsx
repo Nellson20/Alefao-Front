@@ -51,7 +51,7 @@ const DriverDashboard: React.FC = () => {
                 <div className="w-2 h-2 rounded-full bg-primary-400 animate-pulse" />
                 {t('dashboard.stats.active_orders')}: {t(`orders.status.${activeOrder.status.toLowerCase()}`, { defaultValue: activeOrder.status })}
               </div>
-              <h2 className="text-2xl md:text-4xl font-black tracking-tight">{t('common.orders')} #{activeOrder.id.substring(0, 8)}</h2>
+              <h2 className="text-2xl md:text-4xl font-black tracking-tight">{t('common.orders')} {activeOrder.reference || `#${activeOrder.id.substring(0, 8)}`}</h2>
               
               <div className="space-y-4">
                 <div className="flex gap-4">
@@ -122,7 +122,7 @@ const DriverDashboard: React.FC = () => {
                    <Clock size={18} className="text-slate-500" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">{t('common.orders')} #{order.id.substring(0, 8)}</p>
+                  <p className="font-semibold text-sm">{t('common.orders')} {order.reference || `#${order.id.substring(0, 8)}`}</p>
                   <p className="text-xs text-slate-500">{new Date(order.updatedAt || order.createdAt).toLocaleString()}</p>
                 </div>
               </div>

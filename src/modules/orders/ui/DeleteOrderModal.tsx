@@ -31,7 +31,7 @@ const DeleteOrderModal: React.FC<DeleteOrderModalProps> = ({ order, isOpen, onCl
           
           <h2 className="text-2xl font-black mb-2">{t('orders.delete_title')}</h2>
           <p className="text-slate-400 mb-8 leading-relaxed">
-            {t('orders.delete_warning', { id: order.id.substring(0, 8) })}
+            {t('orders.delete_warning', { id: order.reference || order.id.substring(0, 8) })}
           </p>
 
           <div className="flex gap-4 w-full">

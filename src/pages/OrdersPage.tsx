@@ -13,6 +13,7 @@ import OrderList from '../modules/orders/ui/OrderList';
 import OrderForm from '../modules/orders/ui/OrderForm';
 import DeleteOrderModal from '../modules/orders/ui/DeleteOrderModal';
 import type { Order } from '../modules/orders/domain/types';
+import OrderRouteMap from '../modules/orders/ui/OrderRouteMap';
 
 const OrdersPage: React.FC = () => {
   const { t } = useTranslation();
@@ -83,6 +84,7 @@ const OrdersPage: React.FC = () => {
 
   const filteredOrders = orders.filter(order => 
     order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (order.reference && order.reference.toLowerCase().includes(searchTerm.toLowerCase())) ||
     order.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.clientName.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -146,7 +148,7 @@ const OrdersPage: React.FC = () => {
                   </div>
                   <div>
                     <h2 className="font-bold text-base">{t('orders.edit_order')}</h2>
-                    <p className="text-[10px] text-slate-500 font-mono">#{selectedOrder.id.substring(0, 8)}</p>
+                    <p className="text-[10px] text-slate-500 font-mono">{selectedOrder.reference || `#${selectedOrder.id.substring(0, 8)}`}</p>
                   </div>
                 </div>
                 <button 
@@ -158,6 +160,15 @@ const OrdersPage: React.FC = () => {
               </div>
               
               <div className="pt-6 overflow-y-auto max-h-[calc(100vh-160px)] custom-scrollbar">
+                <div className="mb-6">
+                  {selectedOrder.pickupLat && selectedOrder.pickupLng && selectedOrder.deliveryLat && selectedOrder.deliveryLng && (
+                    <OrderRouteMap 
+                       className="h-40 w-full mb-6"
+                       pickup={{ lat: selectedOrder.pickupLat, lng: selectedOrder.pickupLng, address: selectedOrder.pickupAddress }}
+                       delivery={{ lat: selectedOrder.deliveryLat, lng: selectedOrder.deliveryLng, address: selectedOrder.deliveryAddress }}
+                    />
+                  )}
+                </div>
                 <OrderForm 
                   initialData={selectedOrder}
                   onSubmit={handleUpdateSubmit}

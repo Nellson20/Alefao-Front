@@ -102,7 +102,7 @@ const VendorDashboard: React.FC = () => {
               <div key={i} className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-bold text-lg">{t('common.orders')} #{order.id.substring(0, 8)}</h4>
+                    <h4 className="font-bold text-lg">{t('common.orders')} {order.reference || `#${order.id.substring(0, 8)}`}</h4>
                     <p className="text-sm text-slate-400">{order.items?.map((item: any) => `${item.quantity}x ${item.name}`).join(', ') || t('common.no_data')}</p>
                   </div>
                   <Badge variant={order.status === 'PENDING' ? 'warning' : 'primary'}>{t(`orders.status.${order.status.toLowerCase()}`, { defaultValue: order.status })}</Badge>

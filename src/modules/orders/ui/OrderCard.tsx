@@ -21,13 +21,13 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, userRole, isSelected, onCl
 
   const getStatusVariant = (status: string) => {
     switch (status.toUpperCase()) {
-      case 'CREATED': return 'secondary';
+      case 'CREATED': return 'neutral';
       case 'PENDING': return 'warning';
       case 'ACCEPTED': return 'primary';
       case 'ASSIGNED': return 'primary';
       case 'PICKED_UP': return 'primary';
       case 'DELIVERED': return 'success';
-      case 'CANCELLED': return 'danger';
+      case 'CANCELLED': return 'error';
       default: return 'primary';
     }
   };
@@ -46,7 +46,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, userRole, isSelected, onCl
             <div className="w-10 h-10 rounded-xl bg-primary-500/10 text-primary-400 flex items-center justify-center">
               <Package size={20} />
             </div>
-            <span className="font-bold text-lg">#{order.id.substring(0, 8)}</span>
+            <span className="font-bold text-lg">{order.reference || `#${order.id.substring(0, 8)}`}</span>
           </div>
           <Badge variant={getStatusVariant(order.status)}>
             {t(`orders.status.${order.status.toLowerCase()}`, { defaultValue: order.status })}

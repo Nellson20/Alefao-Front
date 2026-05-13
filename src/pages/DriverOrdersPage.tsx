@@ -11,6 +11,7 @@ import { useOrders } from '../modules/orders/application/useOrders';
 import { orderRepository } from '../modules/orders/infrastructure/order.repository';
 import OrderCard from '../modules/orders/ui/OrderCard';
 import type { Order } from '../modules/orders/domain/types';
+import OrderRouteMap from '../modules/orders/ui/OrderRouteMap';
 
 const DriverOrdersPage: React.FC = () => {
   const { t } = useTranslation();
@@ -26,6 +27,7 @@ const DriverOrdersPage: React.FC = () => {
   const filteredOrders = orders.filter(order => {
     // Search filter
     const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (order.reference && order.reference.toLowerCase().includes(searchTerm.toLowerCase())) ||
                          order.pickupAddress?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.deliveryAddress?.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -198,7 +200,7 @@ const DriverOrdersPage: React.FC = () => {
                   </div>
                   <div>
                     <h2 className="font-bold text-lg">{t('orders.order_details')}</h2>
-                    <p className="text-xs text-slate-500 font-mono">#{selectedOrder.id.substring(0, 8)}</p>
+                    <p className="text-xs text-slate-500 font-mono">{selectedOrder.reference || `#${selectedOrder.id.substring(0, 8)}`}</p>
                   </div>
                 </div>
                 <button 
@@ -214,6 +216,13 @@ const DriverOrdersPage: React.FC = () => {
               
               <div className="pt-6 overflow-y-auto max-h-[calc(100vh-160px)] custom-scrollbar">
                 <div className="space-y-6">
+                   {selectedOrder.pickupLat && selectedOrder.pickupLng && selectedOrder.deliveryLat && selectedOrder.deliveryLng && (
+                     <OrderRouteMap 
+                        className="h-48 w-full"
+                        pickup={{ lat: selectedOrder.pickupLat, lng: selectedOrder.pickupLng, address: selectedOrder.pickupAddress }}
+                        delivery={{ lat: selectedOrder.deliveryLat, lng: selectedOrder.deliveryLng, address: selectedOrder.deliveryAddress }}
+                     />
+                   )}
                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
                       <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">{t('orders.status_title') || 'Status'}</p>
                       <Badge variant="primary">{t(`orders.status.${selectedOrder.status.toLowerCase()}`)}</Badge>

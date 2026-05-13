@@ -11,6 +11,7 @@ export interface OrderAttachment {
 
 export interface Order {
   id: string;
+  reference?: string;
   pickupAddress: string;
   deliveryAddress: string;
   pickupLat?: number;

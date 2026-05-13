@@ -97,7 +97,7 @@ const AdminDashboard: React.FC = () => {
                   <Package size={20} className="text-slate-400" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-semibold text-slate-100">{t('common.orders')} #{order.id.substring(0, 8)}</p>
+                  <p className="font-semibold text-slate-100">{t('common.orders')} {order.reference || `#${order.id.substring(0, 8)}`}</p>
                   <p className="text-sm text-slate-500">{t(`orders.status.${order.status.toLowerCase()}`, { defaultValue: order.status })} • {order.items?.length || 0} {t('orders.items').toLowerCase()}</p>
                 </div>
                 <div className="text-right">
